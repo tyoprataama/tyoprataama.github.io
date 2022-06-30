@@ -23,6 +23,7 @@ html, body{
 	padding: 0;
 	margin: 0;
 	scroll-behavior: smooth;
+	font-family: apercu;
 }
 
 body *{
@@ -156,9 +157,9 @@ h6 { font-size: 16px;}
 	border-radius: 50%;
 	margin: 5px;
 
-	-webkit-box-shadow: -1px 1px 3px -1px rgba(0,0,0,0.75);
-	-moz-box-shadow: -1px 1px 3px -1px rgba(0,0,0,0.75);
-	box-shadow: -1px 1px 3px -1px rgba(0,0,0,0.75);
+	box-shadow: -9px 9px 0px -3px rgba(0, 0, 0, 1);
+	-webkit-box-shadow: -9px 9px 0px -3px rgba(0, 0, 0, 1);
+	-moz-box-shadow: -9px 9px 0px -3px rgba(0, 0, 0, 1);
 
 }
 
@@ -301,11 +302,19 @@ h6 { font-size: 16px;}
 	background-color: var(--previewShadow);
 }
 
-
+.comingsoon{
+	text-align: center;
+	justify-content: center;
+	font-weight: 100;
+	color: #3514DC;
+}
 .social-links{
 	display: grid;
 	align-content: center;
 	text-align: center;
+}
+.social-links a{
+	color: #3514DC;
 }
 
 #social_img{
@@ -318,6 +327,8 @@ h6 { font-size: 16px;}
 	border: 1px solid #000;
 	cursor: pointer;
 	margin: 20px 0px;
+	justify-content: center;
+	text-align: center;
 }
 .btnnn:hover{
 	box-shadow: -9px 9px 0px -3px rgba(0, 0, 0, 1);
