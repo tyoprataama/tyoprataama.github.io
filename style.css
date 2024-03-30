@@ -26,10 +26,16 @@ p {
   width: 100%;
   text-align: center;
 }
-.comingsoon > p {
+
+.comm {
+  margin-bottom: 20px;
+}
+
+.comingsoon>p {
   margin-top: 50px;
 }
-.blue-span{
+
+.blue-span {
   color: blue;
   font-weight: 600;
   text-decoration: underline;
