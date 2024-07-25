@@ -10,6 +10,8 @@
 body {
   font-family: 'Plus Jakarta Sans',
     sans-serif;
+  background-image: linear-gradient(#fff, #F3F7EC);
+
 }
 
 html {
@@ -118,10 +120,13 @@ a:hover {
 
 .menu-links {
   position: absolute;
+  margin-top: 10px;
   top: 100%;
   right: 0;
-  background-color: white;
-  width: fit-content;
+  background-color: #dce6fa;
+  opacity: 70%;
+  border-radius: 15px;
+  width: 400px;
   max-height: 0;
   overflow: hidden;
   transition: all 0.3 ease-in-out;
@@ -196,8 +201,11 @@ section {
   display: flex;
   height: 400px;
   width: 400px;
+  background-size: contain;
+  background-repeat: no-repeat;
   margin: auto 0;
 }
+
 
 .section__text {
   align-self: center;
@@ -321,8 +329,8 @@ section {
   flex: 1;
   background: white;
   border-radius: 2rem;
-  border: rgb(53, 53, 53) 0.1rem solid;
-  border-color: rgb(163, 163, 163);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
   text-align: center;
 }
 
