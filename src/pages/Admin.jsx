@@ -7,7 +7,9 @@ import {
   parseReadMinutes,
   formatReadTime,
   sortPinnedThenDate,
+  dateTimeLabel,
 } from '../lib/helpers.js'
+import ImageInput from '../components/ImageInput.jsx'
 import {
   fetchArticles,
   createArticle,
@@ -16,8 +18,8 @@ import {
 } from '../api/articles.js'
 
 const EMPTY = {
-  title: '', slug: '', subtitle: '', date: '', readTime: '',
-  tag: 'career', tagColor: 'blue', isPinned: false, picture: false,
+  title: '', slug: '', subtitle: '', date: '', time: '', readTime: '',
+  tag: 'Career', tagColor: 'blue', isPinned: false, picture: false,
   urlPicture: '', body: [{ type: 'paragraph', text: '' }],
 }
 
@@ -84,6 +86,7 @@ function ArticleForm({ initial, onSave, onCancel }) {
         <input className={field} placeholder="Judul" value={form.title} onChange={(e) => set('title', e.target.value)} />
         <input className={field} placeholder="Slug (mis. siapakah-saya)" value={form.slug} onChange={(e) => set('slug', e.target.value)} />
         <input className={field} placeholder="Tanggal (18 April 2026)" value={form.date} onChange={(e) => set('date', e.target.value)} />
+        <input className={field} placeholder="Waktu upload (mis. 19:00 WIB)" value={form.time || ''} onChange={(e) => set('time', e.target.value)} />
         <input className={field} type="number" min="1" placeholder="Lama baca (menit)" value={parseReadMinutes(form.readTime)} onChange={(e) => set('readTime', formatReadTime(e.target.value))}/>
       <select
       className={field}
@@ -98,11 +101,12 @@ function ArticleForm({ initial, onSave, onCancel }) {
         </label>
       </div>
       <textarea className={field + ' mt-3 w-full'} rows={2} placeholder="Subtitle" value={form.subtitle} onChange={(e) => set('subtitle', e.target.value)} />
-      <div className="mt-2 grid grid-cols-2 gap-3">
-        <label className="flex items-center gap-2 text-[0.85rem] text-ink">
-          <input type="checkbox" checked={form.picture} onChange={(e) => set('picture', e.target.checked)} /> Punya gambar hero
-        </label>
-        <input className={field} placeholder="URL gambar hero (/assets/...)" value={form.urlPicture || ''} onChange={(e) => set('urlPicture', e.target.value)} />
+      <div className="mt-3">
+        <ImageInput
+          label="Gambar hero (opsional)"
+          value={form.urlPicture || ''}
+          onChange={(v) => setForm((f) => ({ ...f, urlPicture: v, picture: !!v }))}
+        />
       </div>
 
       {/* Editor blok konten */}
@@ -120,7 +124,7 @@ function ArticleForm({ initial, onSave, onCancel }) {
             </div>
             {b.type === 'image' ? (
               <div className="grid gap-2">
-                <input className={field} placeholder="URL gambar" value={b.url || ''} onChange={(e) => setBlock(i, { url: e.target.value })} />
+                <ImageInput label="Gambar blok" value={b.url || ''} onChange={(url) => setBlock(i, { url })} />
                 <input className={field} placeholder="Caption" value={b.caption || ''} onChange={(e) => setBlock(i, { caption: e.target.value })} />
               </div>
             ) : (
@@ -195,7 +199,7 @@ function Dashboard() {
             <span className={`rounded-[20px] px-2.5 py-1 text-[0.65rem] font-medium uppercase ${tagColorClass(colorForTag(a.tag))}`}>
               {a.tag}
             </span>
-            <span className="text-[0.75rem] text-ink-muted">{a.date}</span>
+            <span className="text-[0.75rem] text-ink-muted">{dateTimeLabel(a)}</span>
           </div>
           <h3 className="truncate text-[0.95rem] font-medium text-ink">{a.title}</h3>
         </div>

@@ -1,4 +1,4 @@
-// ── Tampilan tag ─────────────────────────────────────────
+// ── Tampilan tag ────────────────────────────────────
 // Map sebuah key warna ke kelas Tailwind komponen.
 export function tagColorClass(color) {
   const map = {
@@ -10,7 +10,7 @@ export function tagColorClass(color) {
   return map[color] || 'tag-blue'
 }
 
-// ── Excerpt ──────────────────────────────────────────────
+// ── Excerpt ───────────────────────────────────────
 // Ambil paragraf pertama, dipangkas jadi cuplikan singkat.
 export function getExcerpt(body, max = 120) {
   const first = (body || []).find((b) => b.type === 'paragraph')
@@ -18,28 +18,28 @@ export function getExcerpt(body, max = 120) {
   return first.text.length > max ? first.text.slice(0, max) + '...' : first.text
 }
 
-// ── #1 Tag → warna tetap per kategori ────────────────────
+// ── #1 Tag → warna tetap per kategori ────────────────
 export const TAG_COLORS = {
   Career: 'blue',
   Finance: 'coral',
   Farm: 'mint',
   Personal: 'amber',
 }
-export const TAGS = Object.keys(TAG_COLORS) // ['career','finance','farm','personal']
+export const TAGS = Object.keys(TAG_COLORS) // ['Career','Finance','Farm','Personal']
 
-// Warna selalu mengikuti tag (case-insensitive + beberapa alias).
+// Warna selalu mengikuti tag (case-insensitive + beberapa alias Indonesia).
 export function colorForTag(tag) {
   const key = String(tag || '').trim().toLowerCase()
-  const alias = {
-    Career: 'blue', karir: 'blue',
-    Finance: 'coral', keuangan: 'coral',
-    Farm: 'mint', tani: 'mint', pertanian: 'mint',
-    Personal: 'amber', pribadi: 'amber',
+  const map = {
+    career: 'blue', karir: 'blue',
+    finance: 'coral', keuangan: 'coral',
+    farm: 'mint', tani: 'mint', pertanian: 'mint',
+    personal: 'amber', pribadi: 'amber',
   }
-  return alias[key] || TAG_COLORS[key] || 'blue'
+  return map[key] || 'blue'
 }
 
-// ── #3 Read time ─────────────────────────────────────────
+// ── #3 Read time ──────────────────────────────
 export function parseReadMinutes(value) {
   const m = String(value ?? '').match(/\d+/) // "3 menit" / "3" -> "3"
   return m ? parseInt(m[0], 10) : ''
@@ -49,7 +49,42 @@ export function formatReadTime(minutes) {
   return Number.isFinite(n) && n > 0 ? `${n} menit` : '' // 3 -> "3 menit"
 }
 
-// ── Urutan ───────────────────────────────────────────────
+// ── Tanggal + waktu upload (mis. "18 April 2026 · 19:00 WIB") ──
+export function dateTimeLabel(a) {
+  if (!a) return ''
+  return a.time ? `${a.date} · ${a.time}` : a.date
+}
+
+// ── Tanggal pendek utk footer (mis. "25 Jun 2026", zona Asia/Jakarta) ──
+const ID_SHORT = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+export function formatShortDate(input) {
+  const d = input instanceof Date ? input : new Date(input)
+  if (isNaN(d.getTime())) return ''
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jakarta', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(d)
+  const get = (t) => parts.find((p) => p.type === t)?.value
+  const day = parseInt(get('day'), 10)
+  const mon = ID_SHORT[parseInt(get('month'), 10) - 1]
+  return `${day} ${mon} ${get('year')}`
+}
+
+// ── #2 Sumber gambar ───────────────────────────
+// Ubah link berbagi (mis. Google Drive) jadi URL yang bisa dipakai <img>.
+// data URL (hasil upload base64) & path lokal dibiarkan apa adanya.
+export function resolveImageSrc(src) {
+  const s = String(src || '').trim()
+  if (!s) return ''
+  if (s.startsWith('data:') || s.startsWith('blob:') || s.startsWith('/')) return s
+  const host = "https://drive.google.com/thumbnail"
+  const drive =
+    s.match(/drive\.google\.com\/file\/d\/([^/]+)/) ||
+    s.match(/[?&]id=([^&]+)/)
+  if (drive) return host + '?' + 'id=' + drive[1] + '&sz=w1600'
+  return s
+}
+
+// ── Urutan ────────────────────────────────────
 // Pinned dulu, sisanya pertahankan urutan asli.
 export function sortPinnedFirst(list) {
   return [

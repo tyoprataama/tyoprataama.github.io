@@ -1,3 +1,5 @@
+import { resolveImageSrc } from '../lib/helpers.js'
+
 // Renders the block array (paragraph | heading | blockquote | pullquote | image)
 // inside a Tailwind `prose` container for Medium-like readability.
 export default function ArticleBody({ blocks }) {
@@ -21,7 +23,7 @@ export default function ArticleBody({ blocks }) {
           case 'image':
             return (
               <figure key={i} className="my-10">
-                <img src={block.url} alt={block.caption || ''} className="w-full rounded-2xl" />
+                <img src={resolveImageSrc(block.url)} alt={block.caption || ''} className="w-full rounded-2xl" />
                 {block.caption && (
                   <figcaption className="mt-2 text-center text-[0.8rem] text-ink-muted">{block.caption}</figcaption>
                 )}

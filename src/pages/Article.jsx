@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { fetchArticleBySlug, fetchArticles } from '../api/articles.js'
 import ArticleBody from '../components/ArticleBody.jsx'
-import { tagColorClass } from '../lib/helpers.js'
+import { tagColorClass, resolveImageSrc, dateTimeLabel } from '../lib/helpers.js'
 
 // Scroll-reading progress bar.
 function useScrollProgress() {
@@ -84,7 +84,7 @@ if (!article) {
               {article.tag}
             </span>
             <span className="text-[0.5rem] text-ink-muted">●</span>
-            <span className="text-[0.8rem] text-ink-muted">{article.date}</span>
+            <span className="text-[0.8rem] text-ink-muted">{dateTimeLabel(article)}</span>
             <span className="text-[0.5rem] text-ink-muted">●</span>
             <span className="text-[0.8rem] text-ink-muted">{article.readTime} baca</span>
           </div>
@@ -102,9 +102,9 @@ if (!article) {
         </div>
 
         {/* Hero image (only when the article defines one) */}
-        {article.picture && article.urlPicture && (
+        {article.urlPicture && (
           <div className="mb-10">
-            <img src={article.urlPicture} alt={article.title} className="w-full rounded-2xl" />
+            <img src={resolveImageSrc(article.urlPicture)} alt={article.title} className="w-full rounded-2xl" />
           </div>
         )}
 

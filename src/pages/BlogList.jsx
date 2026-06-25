@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArticles } from '../api/articles.js'
-import { tagColorClass, getExcerpt, sortPinnedFirst, sortPinnedThenDate } from '../lib/helpers.js'
+import { tagColorClass, getExcerpt, sortPinnedFirst, sortPinnedThenDate, dateTimeLabel } from '../lib/helpers.js'
 
 export default function BlogList() {
   const [articles, setArticles] = useState([])
@@ -71,7 +71,7 @@ export default function BlogList() {
                   <span className={`rounded-[20px] px-2.5 py-[3px] text-[0.7rem] font-medium uppercase tracking-[0.06em] ${tagColorClass(a.tagColor)}`}>
                     {a.tag}
                   </span>
-                  <span className="text-[0.78rem] text-ink-muted">{a.date}</span>
+                  <span className="text-[0.78rem] text-ink-muted">{dateTimeLabel(a)}</span>
                 </div>
                 <h2 className="mb-1 font-serif text-[1.25rem] leading-snug tracking-[-0.01em] text-ink">{a.title}</h2>
                 <p className="text-[0.86rem] leading-[1.55] text-ink-secondary">{getExcerpt(a.body)}</p>
