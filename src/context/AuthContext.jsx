@@ -1,43 +1,33 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-
-// ──────────────────────────────────────────────────────────────
-// DEMO-ONLY client-side auth.
-//
-// GitHub Pages is static hosting — there is no server to verify a password.
-// This gate only protects the /admin UI in the browser and is NOT real security.
-// For a real admin you'd add a backend / auth provider (e.g. Supabase, Firebase,
-// Auth0) and verify server-side. Credentials below are intentionally obvious.
-// ──────────────────────────────────────────────────────────────
-const DEMO_USER = 'admin'
-const DEMO_PASS = 'admin123'
-const STORAGE_KEY = 'tyo-admin-auth'
+import { supabase } from '../lib/supabase.js'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [isAuthed, setIsAuthed] = useState(
-    () => sessionStorage.getItem(STORAGE_KEY) === '1',
-  )
+  const [session, setSession] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (isAuthed) sessionStorage.setItem(STORAGE_KEY, '1')
-    else sessionStorage.removeItem(STORAGE_KEY)
-  }, [isAuthed])
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setLoading(false)
+    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    return () => sub.subscription.unsubscribe()
+  }, [])
 
-  const login = (user, pass) => {
-    if (user === DEMO_USER && pass === DEMO_PASS) {
-      setIsAuthed(true)
-      return { ok: true }
-    }
-    return { ok: false, error: 'Username atau password salah.' }
+  const login = async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    return error ? { ok: false, error: error.message } : { ok: true }
   }
-  const logout = () => setIsAuthed(false)
+
+  const logout = () => supabase.auth.signOut()
 
   return (
-    <AuthContext.Provider value={{ isAuthed, login, logout, demo: { user: DEMO_USER, pass: DEMO_PASS } }}>
-      {children}
-    </AuthContext.Provider>
-  )
+  <AuthContext.Provider value= {{isAuthed: !!session, loading, login, logout}} >
+    {children}
+  </AuthContext.Provider>
+)
 }
 
 export const useAuth = () => useContext(AuthContext)

@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useReveal from '../hooks/useReveal.js'
-import articles from '../data/articles.js'
+import { fetchArticles } from '../api/articles.js'
 import { projects, experiences } from '../data/portfolio.js'
 import { tagColorClass, getExcerpt, sortPinnedFirst } from '../lib/helpers.js'
 
@@ -28,8 +29,12 @@ function TagBadge({ label, color }) {
 }
 
 export default function Home() {
+  const [articles, setArticles] = useState([])
+  useEffect(() => {
+    fetchArticles().then(setArticles).catch(console.error)
+  }, [])
   const latest = sortPinnedFirst(articles).slice(0, 3)
-  useReveal([])
+  useReveal([articles])
 
   return (
     <main className="relative z-[1] mx-auto max-w-[780px] px-5 pb-20">

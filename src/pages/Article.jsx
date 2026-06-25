@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import articles, { getArticleBySlug } from '../data/articles.js'
+import { fetchArticleBySlug, fetchArticles } from '../api/articles.js'
 import ArticleBody from '../components/ArticleBody.jsx'
 import { tagColorClass } from '../lib/helpers.js'
 
@@ -21,29 +21,46 @@ function useScrollProgress() {
 }
 
 export default function Article() {
-  const { slug } = useParams()
-  const article = getArticleBySlug(slug)
-  const progress = useScrollProgress()
+ const { slug } = useParams()
+const [article, setArticle] = useState(undefined) // undefined = loading, null = tidak ada
+const [related, setRelated] = useState([])
+const progress = useScrollProgress()
 
-  useEffect(() => {
-    if (article) document.title = `${article.title} — TYO`
-    return () => {
-      document.title = 'Tyo — Portfolio'
-    }
-  }, [article])
+useEffect(() => {
+  let alive = true
+  fetchArticleBySlug(slug)
+    .then((a) => alive && setArticle(a))
+    .catch(() => alive && setArticle(null))
+  fetchArticles()
+    .then((all) => alive && setRelated(all.filter((a) => a.slug !== slug).slice(0, 3)))
+    .catch(console.error)
+  return () => { alive = false }
+}, [slug])
 
-  // Error state — slug not found.
-  if (!article) {
-    return (
-      <main className="relative z-[1] mx-auto max-w-[680px] px-6 py-32 text-center">
-        <h2 className="font-serif text-[2rem] text-ink">Artikel tidak ditemukan.</h2>
-        <p className="mt-3 text-ink-secondary">Artikel yang Anda cari tidak ada atau sudah dipindahkan.</p>
-        <Link to="/blog" className="mt-6 inline-block text-accent-blue">← Kembali ke semua tulisan</Link>
-      </main>
-    )
-  }
+useEffect(() => {
+  if (article) document.title = `${article.title} — TYO`
+  return () => { document.title = 'Tyo — Portfolio' }
+}, [article])
 
-  const related = articles.filter((a) => a.slug !== slug).slice(0, 3)
+// Loading state — data masih diambil dari Supabase.
+if (article === undefined) {
+  return (
+    <main className="relative z-[1] mx-auto max-w-[680px] px-6 py-32 text-center text-ink-muted">
+      Memuat…
+    </main>
+  )
+}
+
+// Error state — slug tidak ditemukan.
+if (!article) {
+  return (
+    <main className="relative z-[1] mx-auto max-w-[680px] px-6 py-32 text-center">
+      <h2 className="font-serif text-[2rem] text-ink">Artikel tidak ditemukan.</h2>
+      <p className="mt-3 text-ink-secondary">Artikel yang Anda cari tidak ada atau sudah dipindahkan.</p>
+      <Link to="/blog" className="mt-6 inline-block text-accent-blue">← Kembali ke semua tulisan</Link>
+    </main>
+  )
+}
 
   return (
     <>

@@ -1,11 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import articles from '../data/articles.js'
+import { fetchArticles } from '../api/articles.js'
 import { tagColorClass, getExcerpt, sortPinnedFirst } from '../lib/helpers.js'
 
 export default function BlogList() {
+  const [articles, setArticles] = useState([])
   const [filter, setFilter] = useState('all')
-  const tags = useMemo(() => [...new Set(articles.map((a) => a.tag))], [])
+
+  useEffect(() => {
+    fetchArticles().then(setArticles).catch(console.error)
+  }, [])
+
+  const tags = useMemo(() => [...new Set(articles.map((a) => a.tag))], [articles])
 
   const filtered = sortPinnedFirst(
     filter === 'all' ? articles : articles.filter((a) => a.tag === filter),
