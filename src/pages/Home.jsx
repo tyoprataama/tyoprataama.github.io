@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import useReveal from '../hooks/useReveal.js'
 import { fetchArticles } from '../api/articles.js'
 import { projects, experiences } from '../data/portfolio.js'
-import { tagColorClass, getExcerpt, sortPinnedFirst } from '../lib/helpers.js'
+import { tagColorClass, getExcerpt, sortPinnedFirst, sortPinnedThenDate } from '../lib/helpers.js'
 
 const accentBar = {
   mint: 'before:bg-accent-mint',
@@ -33,7 +33,7 @@ export default function Home() {
   useEffect(() => {
     fetchArticles().then(setArticles).catch(console.error)
   }, [])
-  const latest = sortPinnedFirst(articles).slice(0, 3)
+  const latest = sortPinnedThenDate(articles).slice(0, 3)
   useReveal([articles])
 
   return (

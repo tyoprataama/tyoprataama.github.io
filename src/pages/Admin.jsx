@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
-import { tagColorClass } from '../lib/helpers.js'
+import {
+  tagColorClass,
+  colorForTag,
+  TAGS,
+  parseReadMinutes,
+  formatReadTime,
+  sortPinnedThenDate,
+} from '../lib/helpers.js'
 import {
   fetchArticles,
   createArticle,
@@ -10,8 +17,8 @@ import {
 
 const EMPTY = {
   title: '', slug: '', subtitle: '', date: '', readTime: '',
-  tag: '', tagColor: 'blue', isPinned: false, picture: false,
-  urlPicture: '', body: [{ type: 'paragraph', text: '' }], sortOrder: 0,
+  tag: 'career', tagColor: 'blue', isPinned: false, picture: false,
+  urlPicture: '', body: [{ type: 'paragraph', text: '' }],
 }
 
 // ── Login ───────────────────────────────────────────────
@@ -77,13 +84,15 @@ function ArticleForm({ initial, onSave, onCancel }) {
         <input className={field} placeholder="Judul" value={form.title} onChange={(e) => set('title', e.target.value)} />
         <input className={field} placeholder="Slug (mis. siapakah-saya)" value={form.slug} onChange={(e) => set('slug', e.target.value)} />
         <input className={field} placeholder="Tanggal (18 April 2026)" value={form.date} onChange={(e) => set('date', e.target.value)} />
-        <input className={field} placeholder="Read time (5 menit)" value={form.readTime} onChange={(e) => set('readTime', e.target.value)} />
-        <input className={field} placeholder="Tag (Career)" value={form.tag} onChange={(e) => set('tag', e.target.value)} />
-        <select className={field} value={form.tagColor} onChange={(e) => set('tagColor', e.target.value)}>
-          <option value="blue">blue</option><option value="coral">coral</option>
-          <option value="mint">mint</option><option value="amber">amber</option>
-        </select>
-        <input className={field} type="number" placeholder="Urutan (mis. 16)" value={form.sortOrder} onChange={(e) => set('sortOrder', Number(e.target.value))} />
+        <input className={field} type="number" min="1" placeholder="Lama baca (menit)" value={parseReadMinutes(form.readTime)} onChange={(e) => set('readTime', formatReadTime(e.target.value))}/>
+      <select
+      className={field}
+      value={form.tag}
+      onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value, tagColor: colorForTag(e.target.value) }))}>
+        {TAGS.map((t) => (
+        <option key={t} value={t}>{t}</option>
+      ))}
+</select>
         <label className="flex items-center gap-2 text-[0.85rem] text-ink">
           <input type="checkbox" checked={form.isPinned} onChange={(e) => set('isPinned', e.target.checked)} /> Pinned
         </label>
@@ -160,46 +169,52 @@ function Dashboard() {
 
   return (
     <main className="relative z-[1] mx-auto max-w-[900px] px-6 pb-24 pt-28">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-[2rem] text-ink">Dashboard</h1>
-          <p className="text-[0.9rem] text-ink-secondary">{list.length} artikel.</p>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 className="font-serif text-[1.7rem] text-ink sm:text-[2rem]">Dashboard</h1>
+    <p className="text-[0.9rem] text-ink-secondary">{list.length} artikel.</p>
+  </div>
+  <div className="flex gap-2">
+    <button onClick={() => setEditing({ ...EMPTY })} className="rounded-[30px] bg-ink px-3.5 py-2 text-[0.8rem] font-medium text-white sm:px-5 sm:py-2.5 sm:text-[0.85rem]">+ Artikel Baru</button>
+    <button onClick={logout} className="rounded-[30px] border border-black/10 bg-white/70 px-3.5 py-2 text-[0.8rem] font-medium sm:px-5 sm:py-2.5 sm:text-[0.85rem]">Keluar</button>
+  </div>
+</div>
+
+      {loading ? (
+  <p className="text-ink-muted">Memuat…</p>
+) : (
+  <div className="flex flex-col gap-2.5">
+    {sortPinnedThenDate(list).map((a) => (
+      <div
+        key={a.id}
+        className="glass flex flex-col gap-3 rounded-card p-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5"
+      >
+        <div className="min-w-0">
+          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+            {a.isPinned && <span className="text-[0.72rem] text-accent-amber">📌 Pinned</span>}
+            <span className={`rounded-[20px] px-2.5 py-1 text-[0.65rem] font-medium uppercase ${tagColorClass(colorForTag(a.tag))}`}>
+              {a.tag}
+            </span>
+            <span className="text-[0.75rem] text-ink-muted">{a.date}</span>
+          </div>
+          <h3 className="truncate text-[0.95rem] font-medium text-ink">{a.title}</h3>
         </div>
-        <div className="flex gap-3">
-          <button onClick={() => setEditing({ ...EMPTY })} className="rounded-[30px] bg-ink px-5 py-2.5 text-[0.85rem] font-medium text-white">+ Artikel Baru</button>
-          <button onClick={logout} className="rounded-[30px] border border-black/10 bg-white/70 px-5 py-2.5 text-[0.85rem] font-medium">Keluar</button>
+        <div className="flex flex-shrink-0 gap-2">
+          <button
+            onClick={() => setEditing(a)}
+            className="rounded-[20px] border border-accent-blue/30 px-4 py-1.5 text-[0.8rem] font-medium text-accent-blue">
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(a)}
+            className="rounded-[20px] border border-accent-red/30 px-4 py-1.5 text-[0.8rem] font-medium text-accent-red">
+            Hapus
+          </button>
         </div>
       </div>
-
-      {loading ? <p className="text-ink-muted">Memuat…</p> : (
-        <div className="glass overflow-hidden rounded-card shadow-card">
-          <table className="w-full border-collapse text-left text-[0.85rem]">
-            <thead>
-              <tr className="border-b border-black/[0.06] text-[0.72rem] uppercase tracking-wider text-ink-muted">
-                <th className="px-5 py-3 font-medium">Judul</th>
-                <th className="px-5 py-3 font-medium">Tag</th>
-                <th className="px-5 py-3 font-medium">Tanggal</th>
-                <th className="px-5 py-3 font-medium text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((a) => (
-                <tr key={a.id} className="border-b border-black/[0.04] last:border-0 hover:bg-white/50">
-                  <td className="px-5 py-3 text-ink">{a.title}</td>
-                  <td className="px-5 py-3">
-                    <span className={`rounded-[20px] px-2.5 py-1 text-[0.68rem] font-medium uppercase ${tagColorClass(a.tagColor)}`}>{a.tag}</span>
-                  </td>
-                  <td className="whitespace-nowrap px-5 py-3 text-ink-muted">{a.date}</td>
-                  <td className="px-5 py-3 text-right">
-                    <button onClick={() => setEditing(a)} className="mr-3 text-accent-blue">Edit</button>
-                    <button onClick={() => handleDelete(a)} className="text-accent-red">Hapus</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    ))}
+  </div>
+)}
     </main>
   )
 }

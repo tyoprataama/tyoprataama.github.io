@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArticles } from '../api/articles.js'
-import { tagColorClass, getExcerpt, sortPinnedFirst } from '../lib/helpers.js'
+import { tagColorClass, getExcerpt, sortPinnedFirst, sortPinnedThenDate } from '../lib/helpers.js'
 
 export default function BlogList() {
   const [articles, setArticles] = useState([])
@@ -13,7 +13,7 @@ export default function BlogList() {
 
   const tags = useMemo(() => [...new Set(articles.map((a) => a.tag))], [articles])
 
-  const filtered = sortPinnedFirst(
+  const filtered = sortPinnedThenDate(
     filter === 'all' ? articles : articles.filter((a) => a.tag === filter),
   )
 
