@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirecting…</title>
+  <!--
+    GitHub Pages 404 → SPA redirect.
+    When a user refreshes or visits a deep link like /portfolio/blog/some-slug,
+    GitHub Pages serves this 404.html (the file doesn't physically exist).
+    We stash the requested URL and bounce back to index.html, which restores it
+    via the History API so React Router can render the correct route.
+  -->
+  <script>
+    (function () {
+      sessionStorage.redirect = location.href;
+      // Keep the base path ("/"). Adjust if you change `base` in vite.config.js.
+      var base = '/';
+      location.replace(location.origin + base);
+    })();
+  </script>
+</head>
+
+<body>
+  Redirecting…
+</body>
+
+</html>

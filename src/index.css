@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-offwhite text-ink font-sans;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  /* Glass surface reused across cards & navbar */
+  .glass {
+    background: rgba(255, 255, 255, 0.65);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+
+  /* Tag pills (shared) */
+  .tag-blue {
+    @apply text-accent-blue;
+    background: rgba(0, 113, 227, 0.1);
+  }
+  .tag-coral {
+    @apply text-accent-coral;
+    background: rgba(255, 95, 63, 0.1);
+  }
+  .tag-mint {
+    @apply text-accent-mint;
+    background: rgba(0, 196, 140, 0.1);
+  }
+  .tag-amber {
+    @apply text-accent-amber;
+    background: rgba(245, 166, 35, 0.1);
+  }
+}
+
+/* Reveal-on-scroll animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
