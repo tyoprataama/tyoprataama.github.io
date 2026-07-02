@@ -2,7 +2,24 @@
 export const projects = [
   {
     featured: true,
-    number: '01',
+      number: '01',
+    tags: [{
+        label: 'Analytic',
+        color: 'coral'
+      },
+      {
+        label: 'Web',
+        color: 'mint'
+      }
+    ],
+    title: 'Field Management Resource',
+    desc: 'Built interactive data models and visual farm reports called Taniku. Integrated multi-source data to support operational decision-making and business performance monitoring.',
+    tech: ['Web', 'Data Modeling', 'Business Reporting'],
+    links: 'https://tyoprataama.github.io/project',
+  },
+  {
+    featured: true,
+    number: '02',
     tags: [{ label: 'Team Project', color: 'blue' }],
     title: 'Comprehensive OHS Field Audit: Industrial Sugar Mill Djombang Baru',
     desc:
@@ -10,13 +27,8 @@ export const projects = [
     tech: ['SMK3 Standards', 'Risk Mitigation', 'Industrial Hygiene', 'Regulatory Compliance'],
   },
   {
-    tags: [{ label: 'Analytic', color: 'coral' }],
-    title: 'Business Intelligence Dashboard',
-    desc:
-      'Built interactive data models and visual reports using Power BI during the Kominfo RI Fresh Graduate Academy. Integrated multi-source data to support operational decision-making and business performance monitoring.',
-    tech: ['Power BI', 'Data Modeling', 'Business Reporting'],
-  },
-  {
+    featured: true,
+      number: '03',
     tags: [
       { label: 'Web', color: 'mint' },
       { label: 'Team Project', color: 'mint' },

@@ -104,6 +104,13 @@ export default function Home() {
                   {p.number}
                 </div>
               )}
+              {p.links && (
+                <a href={p.links}
+                className = "inline-flex items-center justify-center gap-2 rounded-[30px] border border-black/[0.08] bg-black/[0.06] px-5 py-2.5 text-[0.88rem] font-medium text-ink transition-all hover:bg-ink hover:text-white"
+                >
+                  See the work
+                </a>
+              )}
             </div>
           ))}
         </div>
