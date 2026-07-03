@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 import { fetchLastUpdated } from '../api/articles.js'
 import { formatShortDate } from '../lib/helpers.js'
 
-// Persistent footer rendered by RootLayout on every page.
-// "Last update" otomatis mengikuti artikel yang terakhir ditambah/diedit.
+// Minimal footer rendered on every page. "Updated" mengikuti artikel terbaru.
 export default function Footer() {
   const [lastUpdate, setLastUpdate] = useState('')
 
@@ -18,11 +17,17 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="relative z-[1] py-8 text-center text-[0.78rem] text-ink-muted">
-      <p>
-        made with <span className="text-accent-coral">♥</span> by Tyo Putra &copy; 2026.
-        {lastUpdate && <> Last update: {lastUpdate}</>}
-      </p>
+    <footer className="foot">
+      <div className="wrap row">
+        <div className="c">
+         Tyo Putra · Made with 💙 © 2026 {
+           lastUpdate && ` · Updated ${lastUpdate}`
+         }
+        </div>
+        <div className="s">
+          <a href="mailto:tyopriyantoputra@gmail.com">Email</a>
+        </div>
+      </div>
     </footer>
   )
 }

@@ -46,12 +46,12 @@ function LoginForm() {
         <p className="mb-6 text-[0.85rem] text-ink-secondary">Masuk untuk mengelola artikel.</p>
         <form onSubmit={submit} className="flex flex-col gap-3">
           <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email / ID"
-            className="rounded-sm2 border border-black/10 bg-white/80 px-4 py-3 text-[0.9rem] outline-none focus:border-accent-blue" />
+            className="rounded-sm2 border border-line bg-surface text-ink placeholder:text-ink-muted px-4 py-3 text-[0.9rem] outline-none focus:border-accent" />
           <input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Password"
-            className="rounded-sm2 border border-black/10 bg-white/80 px-4 py-3 text-[0.9rem] outline-none focus:border-accent-blue" />
-          {error && <p className="text-[0.82rem] text-accent-red">{error}</p>}
+            className="rounded-sm2 border border-line bg-surface text-ink placeholder:text-ink-muted px-4 py-3 text-[0.9rem] outline-none focus:border-accent" />
+          {error && <p className="text-[0.82rem] text-[#e5484d]">{error}</p>}
           <button type="submit" disabled={busy}
-            className="mt-1 rounded-[30px] bg-ink px-6 py-3 text-[0.88rem] font-medium text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60">
+            className="mt-1 rounded-[30px] bg-ink px-6 py-3 text-[0.88rem] font-medium text-paper transition-transform hover:-translate-y-0.5 disabled:opacity-60">
             {busy ? 'Memproses…' : 'Masuk'}
           </button>
         </form>
@@ -77,7 +77,7 @@ function ArticleForm({ initial, onSave, onCancel }) {
     setBusy(false)
   }
 
-  const field = "rounded-sm2 border border-black/10 bg-white/80 px-3 py-2 text-[0.88rem] outline-none focus:border-accent-blue"
+  const field = "rounded-sm2 border border-line bg-surface text-ink placeholder:text-ink-muted px-3 py-2 text-[0.88rem] outline-none focus:border-accent"
 
   return (
     <div className="glass rounded-card p-6 shadow-card">
@@ -113,14 +113,14 @@ function ArticleForm({ initial, onSave, onCancel }) {
       <div className="mt-5 text-[0.72rem] font-medium uppercase tracking-wider text-ink-muted">Isi Artikel (blok)</div>
       <div className="mt-2 flex flex-col gap-3">
         {form.body.map((b, i) => (
-          <div key={i} className="rounded-sm2 border border-black/10 bg-white/60 p-3">
+          <div key={i} className="rounded-sm2 border border-line bg-panel p-3">
             <div className="mb-2 flex items-center gap-2">
               <select className={field} value={b.type} onChange={(e) => setBlock(i, { type: e.target.value })}>
                 <option value="paragraph">paragraph</option><option value="heading">heading</option>
                 <option value="blockquote">blockquote</option><option value="pullquote">pullquote</option>
                 <option value="image">image</option>
               </select>
-              <button onClick={() => removeBlock(i)} className="ml-auto text-[0.8rem] text-accent-red">Hapus blok</button>
+              <button onClick={() => removeBlock(i)} className="ml-auto text-[0.8rem] text-[#e5484d]">Hapus blok</button>
             </div>
             {b.type === 'image' ? (
               <div className="grid gap-2">
@@ -132,14 +132,14 @@ function ArticleForm({ initial, onSave, onCancel }) {
             )}
           </div>
         ))}
-        <button onClick={addBlock} className="self-start rounded-[30px] border border-black/10 px-4 py-2 text-[0.82rem]">+ Tambah blok</button>
+        <button onClick={addBlock} className="self-start rounded-[30px] border border-line px-4 py-2 text-[0.82rem]">+ Tambah blok</button>
       </div>
 
       <div className="mt-5 flex gap-3">
-        <button onClick={save} disabled={busy} className="rounded-[30px] bg-ink px-6 py-2.5 text-[0.85rem] font-medium text-white disabled:opacity-60">
+        <button onClick={save} disabled={busy} className="rounded-[30px] bg-ink px-6 py-2.5 text-[0.85rem] font-medium text-paper disabled:opacity-60">
           {busy ? 'Menyimpan…' : 'Simpan'}
         </button>
-        <button onClick={onCancel} className="rounded-[30px] border border-black/10 px-6 py-2.5 text-[0.85rem]">Batal</button>
+        <button onClick={onCancel} className="rounded-[30px] border border-line px-6 py-2.5 text-[0.85rem]">Batal</button>
       </div>
     </div>
   )
@@ -179,8 +179,8 @@ function Dashboard() {
     <p className="text-[0.9rem] text-ink-secondary">{list.length} artikel.</p>
   </div>
   <div className="flex gap-2">
-    <button onClick={() => setEditing({ ...EMPTY })} className="rounded-[30px] bg-ink px-3.5 py-2 text-[0.8rem] font-medium text-white sm:px-5 sm:py-2.5 sm:text-[0.85rem]">+ Artikel Baru</button>
-    <button onClick={logout} className="rounded-[30px] border border-black/10 bg-white/70 px-3.5 py-2 text-[0.8rem] font-medium sm:px-5 sm:py-2.5 sm:text-[0.85rem]">Keluar</button>
+    <button onClick={() => setEditing({ ...EMPTY })} className="rounded-[30px] bg-ink px-3.5 py-2 text-[0.8rem] font-medium text-paper sm:px-5 sm:py-2.5 sm:text-[0.85rem]">+ Artikel Baru</button>
+    <button onClick={logout} className="rounded-[30px] border border-line bg-surface text-ink px-3.5 py-2 text-[0.8rem] font-medium sm:px-5 sm:py-2.5 sm:text-[0.85rem]">Keluar</button>
   </div>
 </div>
 
@@ -206,12 +206,12 @@ function Dashboard() {
         <div className="flex flex-shrink-0 gap-2">
           <button
             onClick={() => setEditing(a)}
-            className="rounded-[20px] border border-accent-blue/30 px-4 py-1.5 text-[0.8rem] font-medium text-accent-blue">
+            className="rounded-[20px] border border-accent/30 px-4 py-1.5 text-[0.8rem] font-medium text-accent">
             Edit
           </button>
           <button
             onClick={() => handleDelete(a)}
-            className="rounded-[20px] border border-accent-red/30 px-4 py-1.5 text-[0.8rem] font-medium text-accent-red">
+            className="rounded-[20px] border border-[#e5484d]/30 px-4 py-1.5 text-[0.8rem] font-medium text-[#e5484d]">
             Hapus
           </button>
         </div>

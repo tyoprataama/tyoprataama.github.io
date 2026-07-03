@@ -1,22 +1,26 @@
-import { useEffect } from 'react'
+import {
+  useEffect
+} from 'react'
 
-// Adds the `.visible` class to every `.reveal` element as it scrolls into view,
-// reproducing the IntersectionObserver behaviour from the original site.
+// Adds `.in` to every `.sr` (scroll-reveal) element as it enters the viewport,
+// and keeps `.reveal`/`.visible` working for any legacy markup.
 export default function useReveal(deps = []) {
   useEffect(() => {
-    const reveals = document.querySelectorAll('.reveal')
+    const els = document.querySelectorAll('.sr, .reveal')
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry, i) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setTimeout(() => entry.target.classList.add('visible'), i * 80)
+            entry.target.classList.add(entry.target.classList.contains('sr') ? 'in' : 'visible')
             observer.unobserve(entry.target)
           }
         })
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
       },
-      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' },
     )
-    reveals.forEach((el) => observer.observe(el))
+    els.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)

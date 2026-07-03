@@ -3,30 +3,19 @@ import { Link } from 'react-router-dom'
 import useReveal from '../hooks/useReveal.js'
 import { fetchArticles } from '../api/articles.js'
 import { projects, experiences } from '../data/portfolio.js'
-import { tagColorClass, getExcerpt, sortPinnedFirst, sortPinnedThenDate } from '../lib/helpers.js'
+import { sortPinnedThenDate, getExcerpt } from '../lib/helpers.js'
 
-const accentBar = {
-  mint: 'before:bg-accent-mint',
-  coral: 'before:bg-accent-coral',
-  red: 'before:bg-accent-red',
-  amber: 'before:bg-accent-amber',
+const scrollTo = (id) => (e) => {
+  e.preventDefault()
+  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 }
 
-function Pill({ children }) {
-  return (
-    <span className="rounded-[20px] bg-black/5 px-2.5 py-1 text-[0.72rem] text-ink-secondary">
-      {children}
-    </span>
-  )
-}
-
-function TagBadge({ label, color }) {
-  return (
-    <span className={`mb-4 mr-2 inline-block rounded-[20px] px-2.5 py-1 text-[0.7rem] font-medium uppercase tracking-[0.06em] ${tagColorClass(color)}`}>
-      {label}
-    </span>
-  )
-}
+const facts = [
+  { k: 'Education', v: '3.56', s: ' / 4.00 GPA' },
+  { k: 'Certification', v: 'AK3 Umum', s: ' BNSP & Kemnaker' },
+  { k: 'Discipline', v: 'Data', s: ' & Operations' },
+  { k: 'Focus', v: 'Mining', s: ' & Resource' },
+]
 
 export default function Home() {
   const [articles, setArticles] = useState([])
@@ -37,165 +26,192 @@ export default function Home() {
   useReveal([articles])
 
   return (
-    <main className="relative z-[1] mx-auto max-w-[780px] px-5 pb-20">
-      {/* Hero */}
-      <section id="home" className="flex min-h-screen flex-col justify-center pt-20">
-        <div className="mb-6 inline-flex animate-fadeUp items-center gap-2 text-[0.78rem] font-medium uppercase tracking-[0.08em] text-accent-blue before:h-0.5 before:w-5 before:rounded before:bg-accent-blue before:content-['']">
-          Available for work
-        </div>
-        <h1 className="mb-6 animate-fadeUp font-serif text-[clamp(3rem,8vw,5.5rem)] leading-[1.05] tracking-[-0.03em] text-ink">
-          A happy<br />
-          <em className="italic text-accent-coral">Fresh Graduate</em>
-          <br />
-          with intent.
-        </h1>
-        <p className="mb-10 max-w-[520px] animate-fadeUp text-[1.1rem] leading-[1.7] text-ink-secondary">
-          Fresh graduate with a background in economics, data analysis, software development and hands on
-          operational experience. Certified in Occupational Health &amp; Safety (AK3 Umum – BNSP &amp; Kemnaker).
-          Seeking to grow in Indonesia's mining and resource industry.
-        </p>
-        <div className="flex animate-fadeUp flex-wrap gap-3">
-          <a
-            href="#projects"
-            onClick={(e) => {
-              e.preventDefault()
-              document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })
-            }}
-            className="inline-flex items-center gap-2 rounded-[30px] bg-ink px-6 py-3 text-[0.88rem] font-medium text-white shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition-all hover:-translate-y-0.5 hover:bg-[#222]"
-          >
-            See my work →
-          </a>
-          <Link
-            to="/blog"
-            className="glass inline-flex items-center gap-2 rounded-[30px] px-6 py-3 text-[0.88rem] font-medium text-ink transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-soft"
-          >
-            ✦ Read my writing
-          </Link>
-        </div>
-      </section>
-
-      {/* Projects */}
-      <section id="projects" className="py-20">
-        <div className="section-label mb-10 inline-flex items-center gap-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] text-ink-muted">
-          Latest Project
-        </div>
-        <div className="reveal grid gap-4">
-          {projects.map((p, i) => (
-            <div
-              key={i}
-              className={`glass relative overflow-hidden rounded-card p-8 shadow-card transition-all hover:-translate-y-1 hover:shadow-[0_16px_48px_rgba(0,0,0,0.1)] ${p.featured ? 'grid grid-cols-[1fr_auto] items-start gap-6 max-[600px]:grid-cols-1' : ''}`}
-            >
-              <div>
-                <div>
-                  {p.tags.map((t, j) => (
-                    <TagBadge key={j} label={t.label} color={t.color} />
-                  ))}
-                </div>
-                <h3 className="mb-2 text-[1.2rem] font-medium tracking-[-0.01em] text-ink">{p.title}</h3>
-                <p className="text-[0.92rem] leading-[1.6] text-ink-secondary">{p.desc}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {p.tech.map((t) => (
-                    <Pill key={t}>{t}</Pill>
-                  ))}
-                </div>
-              </div>
-              {p.featured && (
-                <div className="select-none font-serif text-[4rem] leading-none text-black/5 max-[600px]:hidden">
-                  {p.number}
-                </div>
-              )}
-              {p.links && (
-                <a href={p.links}
-                className = "inline-flex items-center justify-center gap-2 rounded-[30px] border border-black/[0.08] bg-black/[0.06] px-5 py-2.5 text-[0.88rem] font-medium text-ink transition-all hover:bg-ink hover:text-white"
-                >
-                  See the work
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Experience */}
-      <section id="experience" className="py-20">
-        <div className="reveal mb-10 inline-flex items-center gap-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] text-ink-muted">
-          Experience
-        </div>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-3.5">
-          {experiences.map((ex, i) => (
-            <div
-              key={i}
-              className={`glass reveal relative overflow-hidden rounded-card p-7 shadow-card transition-all hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] before:absolute before:left-0 before:right-0 before:top-0 before:h-[3px] before:content-[''] ${accentBar[ex.accent]}`}
-            >
-              <div className="mb-3 text-[0.72rem] font-medium uppercase tracking-[0.06em] text-ink-muted">{ex.period}</div>
-              <h3 className="mb-1 text-[1.05rem] font-medium text-ink">{ex.title}</h3>
-              <div className="mb-3 text-[0.9rem] text-ink-secondary">{ex.company}</div>
-              <p className="text-[0.85rem] leading-[1.6] text-ink-secondary">{ex.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Writing */}
-      <section id="writing" className="py-20">
-        <div className="reveal mb-10 inline-flex items-center gap-2 text-[0.72rem] font-medium uppercase tracking-[0.1em] text-ink-muted">
-          My Latest Writing
-        </div>
-        <div className="grid gap-0.5">
-          {latest.map((a) => (
-            <Link
-              key={a.slug}
-              to={`/blog/${a.slug}`}
-              className="glass reveal mb-2 grid grid-cols-[1fr_auto] items-center gap-5 rounded-sm2 px-7 py-6 text-ink shadow-card transition-all hover:translate-x-1.5 hover:bg-white hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
-            >
-              <div>
-                <div className="mb-1.5 flex items-center gap-2.5">
-                  {a.isPinned && <span className="text-[0.7rem]">📌</span>}
-                  <span className={`rounded-[20px] px-2.5 py-[3px] text-[0.7rem] font-medium uppercase tracking-[0.06em] ${tagColorClass(a.tagColor)}`}>
-                    {a.tag}
-                  </span>
-                  <span className="text-[0.78rem] text-ink-muted">{a.date}</span>
-                </div>
-                <h3 className="mb-1 text-[1rem] font-medium tracking-[-0.01em]">{a.title}</h3>
-                <p className="text-[0.84rem] leading-[1.5] text-ink-secondary">{getExcerpt(a.body, 110)}</p>
-              </div>
-              <span className="text-[1.2rem] text-ink-muted">→</span>
-            </Link>
-          ))}
-        </div>
-        <Link to="/blog" className="reveal mt-4 inline-flex items-center gap-2 text-[0.85rem] font-medium text-accent-blue transition-all hover:gap-3">
-          Semua tulisan →
-        </Link>
-      </section>
-
-      {/* About */}
-      <section id="about" className="py-20">
-        <div className="glass reveal relative grid grid-cols-[auto_1fr] items-center gap-12 overflow-hidden rounded-[28px] p-[52px] shadow-soft max-[600px]:grid-cols-1 max-[600px]:p-9 max-[600px]:text-center">
-          <div
-            className="h-[120px] w-[120px] flex-shrink-0 rounded-full border-[3px] border-white/90 bg-cover shadow-[0_8px_24px_rgba(0,0,0,0.12)] max-[600px]:mx-auto"
-            style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/profile.JPG)` }}
-          />
+    <>
+      {/* ---------------- HERO ---------------- */}
+      <section className="hero" id="home">
+        <div className="wrap hero-grid">
           <div>
-            <h2 className="mb-2.5 font-serif text-[2rem] tracking-[-0.03em] text-ink">Hi, I'm Tyo Pratama Priyanto Putra.</h2>
-            <p className="mb-5 text-[0.95rem] leading-[1.7] text-ink-secondary">
-              An economics graduate from IAIN Kediri with a GPA of 3.56, certified in Occupational Health &amp; Safety
-              (AK3 Umum), and currently managing family owned agricultural operations in East Java. My background spans
-              financial analysis, real field operations, data and software engineering.
+            <div className="lead-eyebrow fade">
+              <span className="dot" />
+              <span className="eyebrow">Available for work</span>
+            </div>
+            <h1 className="fade">
+              Turning economics, data
+              and field <em className="u">safety</em> into
+              real <em>impact</em>.
+            </h1>
+            <p className="sub fade">
+              Fresh graduate blending economics, data analysis, software, and real operational
+              experience. Certified in Occupational Health &amp; Safety (AK3 Umum), building toward
+              Indonesia’s mining &amp; resource industry.
             </p>
-            <p className="mb-5 text-[0.95rem] leading-[1.7] text-ink-secondary">
-              I'm looking to transition into Indonesia's mining and resource industry, where I can bring my analytical
-              mindset, operational discipline, and K3 certification to contribute meaningfully from day one. Open to
-              general roles, operations support, and planning positions.
-            </p>
-            <a
-              href="mailto:tyopriyantoputra@gmail.com"
-              className="inline-flex items-center gap-2 rounded-[30px] border border-black/[0.08] bg-black/[0.06] px-5 py-2.5 text-[0.88rem] font-medium text-ink transition-all hover:bg-ink hover:text-white"
-            >
-              ✉ tyopriyantoputra@gmail.com
-            </a>
+            <div className="actions fade">
+              <a href="#work" className="btn btn-solid" onClick={scrollTo('work')}>
+                Selected work <span className="arw">↗</span>
+              </a>
+            <Link to="/blog" className="btn btn-line">
+            Read my writing
+            </Link>
+            </div>
+          </div>
+          <aside className="fade">
+            <div className="meta">
+              <div className="k">Based in</div>
+              <div className="v">Kediri, East Java, ID</div>
+            </div>
+            <div className="meta">
+              <div className="k">Focus</div>
+              <div className="v">Mining &amp; Resource Industry</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <div className="wrap">
+        <hr className="rule" />
+      </div>
+
+      {/* ---------------- WORK ---------------- */}
+      <section className="section" id="work">
+        <div className="wrap">
+          <div className="shead sr">
+            <h2>Selected work</h2>
+            <span className="no">01 / Projects</span>
+          </div>
+          <div>
+            {projects.map((p, i) => (
+              <div className="work-item sr" key={i}>
+                <div className="wmain">
+                  <h3>{p.title}</h3>
+                  <p>{p.desc}</p>
+                  <div className="stack">
+                    {p.tech.map((t) => (
+                      <span key={t}>{t}</span>
+                    ))}
+                  </div>
+                  {p.links && (
+                    <a
+                      className="btn btn-line wbtn"
+                      href={p.links}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View project <span className="arw">↗</span>
+                    </a>
+                  )}
+                </div>
+                <div className="wnum">{`0${i + 1}`}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
-    </main>
+
+      {/* ---------------- ABOUT (no photo) ---------------- */}
+      <section className="section" id="about">
+        <div className="wrap">
+          <div className="shead sr">
+            <h2>About</h2>
+            <span className="no">02 / Profile</span>
+          </div>
+          <div className="about">
+            <div className="body sr">
+              <p>
+                An economics graduate from IAIN Kediri, certified in Occupational Health &amp; Safety
+                (AK3 Umum), currently managing family owned agricultural operations in East Java.
+              </p>
+              <p className="small">
+                My background spans financial analysis, real field operations, data, and software
+                engineering. I want to move into Indonesia’s mining and resource industry, bringing an
+                analytical mindset, operational discipline, and K3 certification to contribute from
+                day one.
+              </p>
+              <div className="facts">
+                {facts.map((f) => (
+                  <div className="f" key={f.k}>
+                    <div className="k">{f.k}</div>
+                    <div className="v">
+                      {f.v} <small>{f.s}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- EXPERIENCE ---------------- */}
+      <section className="section" id="experience">
+        <div className="wrap">
+          <div className="shead sr">
+            <h2>Experience</h2>
+            <span className="no">03 / Journey</span>
+          </div>
+          <div>
+            {experiences.map((ex, i) => (
+              <div className="exp sr" key={i}>
+                <div className="when">{ex.period}</div>
+                <div>
+                  <div className="role">{ex.title}</div>
+                  <div className="org">{ex.company}</div>
+                  <div className="desc">{ex.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------- WRITING (with excerpt) ---------------- */}
+      {latest.length > 0 && (
+        <section className="section" id="writing">
+          <div className="wrap">
+            <div className="shead sr">
+              <h2>Writing</h2>
+              <span className="no">04 / Notes</span>
+            </div>
+            <div className="writing">
+              {latest.map((a) => (
+                <Link className="wrow sr" key={a.slug} to={`/blog/${a.slug}`}>
+                  <div className="wtop">
+                    <span className="tag">{a.tag}</span>
+                    <span className="rt">{a.readTime}</span>
+                  </div>
+                  <h3>{a.title}</h3>
+                  <p className="wex">{getExcerpt(a.body)}</p>
+                </Link>
+              ))}
+            </div>
+            <Link to="/blog" className="morelink">
+              Read all writing →
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* ---------------- CONTACT (avatar bulat kecil) ---------------- */}
+      <section className="contact" id="contact">
+        <div className="wrap">
+          <div className="avatar sr">
+            <img
+              src={`${import.meta.env.BASE_URL}assets/profile.JPG`}
+              alt="Tyo Pratama"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
+          </div>
+          <span className="eyebrow sr">Let’s work together</span>
+          <h2 className="sr">
+            Say <em>hello</em>.
+          </h2>
+          <br />
+          <a href="mailto:tyopriyantoputra@gmail.com" className="mail sr">
+            tyopriyantoputra@gmail.com
+          </a>
+        </div>
+      </section>
+    </>
   )
 }

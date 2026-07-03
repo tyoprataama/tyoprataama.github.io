@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchArticles } from '../api/articles.js'
-import { tagColorClass, getExcerpt, sortPinnedFirst, sortPinnedThenDate, dateTimeLabel } from '../lib/helpers.js'
+import { tagColorClass, getExcerpt, sortPinnedThenDate, dateTimeLabel } from '../lib/helpers.js'
 
 export default function BlogList() {
   const [articles, setArticles] = useState([])
@@ -18,24 +18,29 @@ export default function BlogList() {
   )
 
   return (
-    <main className="relative z-[1] mx-auto max-w-[760px] px-6 pb-24 pt-28">
-      <div className="mb-10">
-        <h1 className="font-serif text-[clamp(2.2rem,6vw,3.2rem)] tracking-[-0.03em] text-ink">
-          My <em className="italic text-accent-coral">Writing</em>
+    <main className="mx-auto max-w-[780px] px-6 pb-28 pt-36">
+      <div className="mb-12">
+        <div className="text-[0.72rem] font-medium uppercase tracking-[0.22em] text-ink-muted">
+          — The journal
+        </div>
+        <h1 className="mt-5 font-serif text-[clamp(2.4rem,6vw,3.6rem)] font-normal tracking-[-0.03em] text-ink">
+          Writing
         </h1>
-        <p className="mt-2 text-ink-secondary">Pikiran tentang karir, kehidupan, dan hal-hal di antaranya.</p>
+        <p className="mt-3 max-w-[440px] text-ink-secondary">
+          Pikiran tentang karir, kehidupan, dan hal-hal di antaranya.
+        </p>
       </div>
 
       {/* Filters */}
-      <div className="mb-8 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
         {['all', ...tags].map((t) => (
           <button
             key={t}
             onClick={() => setFilter(t)}
-            className={`rounded-[30px] border px-4 py-1.5 text-[0.82rem] font-medium transition-all ${
+            className={`rounded-full border px-4 py-1.5 text-[0.8rem] transition-all ${
               filter === t
-                ? 'border-ink bg-ink text-white'
-                : 'border-black/[0.08] bg-white/60 text-ink-secondary hover:bg-white'
+                ? 'border-transparent bg-ink text-paper'
+                : 'border-line text-ink-secondary hover:border-line2 hover:text-ink'
             }`}
           >
             {t === 'all' ? 'Semua' : t}
@@ -47,39 +52,31 @@ export default function BlogList() {
       {filtered.length === 0 ? (
         <div className="py-16 text-center text-ink-muted">Belum ada artikel di kategori ini.</div>
       ) : (
-        <div className="grid gap-2.5">
-          {filtered.map((a, i) => (
+        <div>
+          {filtered.map((a) => (
             <Link
               key={a.slug}
               to={`/blog/${a.slug}`}
-              className={`glass group grid grid-cols-[1fr_auto] items-center gap-5 rounded-card px-7 py-6 text-ink shadow-card transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_10px_36px_rgba(0,0,0,0.08)] ${
-                i === 0 ? 'ring-1 ring-accent-blue/10' : ''
-              }`}
+              className="group grid grid-cols-[1fr_auto] items-center gap-6 border-t border-line px-2 py-8 text-ink transition-all last:border-b hover:bg-surface hover:px-4"
             >
               <div>
-                <div className="mb-2 flex flex-wrap items-center gap-2.5">
+                <div className="mb-2.5 flex flex-wrap items-center gap-2.5">
                   {a.isPinned && (
-                    <span className="rounded-[20px] bg-accent-amber/10 px-2 py-[3px] text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-accent-amber">
+                    <span className="rounded-full bg-accent-soft px-2 py-[3px] text-[0.65rem] font-medium uppercase tracking-[0.08em] text-accent">
                       Pinned
                     </span>
                   )}
-                  {i === 0 && !a.isPinned && (
-                    <span className="rounded-[20px] bg-accent-blue/10 px-2 py-[3px] text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-accent-blue">
-                      Latest
-                    </span>
-                  )}
-                  <span className={`rounded-[20px] px-2.5 py-[3px] text-[0.7rem] font-medium uppercase tracking-[0.06em] ${tagColorClass(a.tagColor)}`}>
+                  <span className={`rounded-full px-2.5 py-[3px] text-[0.7rem] font-medium uppercase tracking-[0.06em] ${tagColorClass(a.tagColor)}`}>
                     {a.tag}
                   </span>
-                  <span className="text-[0.78rem] text-ink-muted">{dateTimeLabel(a)}</span>
+                  <span className="text-[0.74rem] text-ink-muted">{dateTimeLabel(a)}</span>
                 </div>
-                <h2 className="mb-1 font-serif text-[1.25rem] leading-snug tracking-[-0.01em] text-ink">{a.title}</h2>
-                <p className="text-[0.86rem] leading-[1.55] text-ink-secondary">{getExcerpt(a.body)}</p>
+                <h2 className="mb-1.5 font-serif text-[1.55rem] font-normal leading-tight tracking-[-0.01em] text-ink transition-colors group-hover:text-accent">
+                  {a.title}
+                </h2>
+                <p className="max-w-[560px] text-[0.9rem] leading-[1.6] text-ink-secondary">{getExcerpt(a.body)}</p>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <span className="whitespace-nowrap text-[0.75rem] text-ink-muted">{a.readTime}</span>
-                <span className="text-[1.1rem] text-ink-muted transition-transform group-hover:translate-x-1">↗</span>
-              </div>
+              <span className="self-start pt-2 text-[1.3rem] text-ink-muted transition-transform group-hover:translate-x-1 group-hover:text-accent">↗</span>
             </Link>
           ))}
         </div>

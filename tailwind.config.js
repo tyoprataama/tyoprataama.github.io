@@ -1,56 +1,54 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
-        serif: ['"DM Serif Display"', 'serif'],
-        sans: ['"DM Sans"', 'sans-serif'],
-        lora: ['Lora', 'serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Fraunces', 'Georgia', 'serif'],
+        display: ['Fraunces', 'Georgia', 'serif'],
+        lora: ['Fraunces', 'Georgia', 'serif'],
+        mono: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        offwhite: '#f7f7f5',
+        paper: 'var(--bg)',
+        panel: 'var(--bg-2)',
+        surface: 'var(--surface)',
+        line: 'var(--line)',
+        line2: 'var(--line-2)',
         ink: {
-          DEFAULT: '#111110',
-          secondary: '#6b6b6b',
-          muted: '#a8a8a8',
+          DEFAULT: 'var(--ink)',
+          secondary: 'var(--ink-2)',
+          muted: 'var(--ink-3)',
         },
         accent: {
-          blue: '#057bf1',
-          coral: '#0040ff',
-          red: '#f65c4b',
-          mint: '#00c48c',
-          amber: '#f5a623',
+          DEFAULT: 'var(--accent)',
+          soft: 'var(--accent-soft)',
         },
       },
       borderRadius: {
-        card: '20px',
-        sm2: '12px',
+        card: '12px',
+        sm2: '8px'
       },
       boxShadow: {
-        soft: '0 8px 32px rgba(0,0,0,0.08)',
-        card: '0 2px 20px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)',
+        card: '0 18px 40px rgba(0,0,0,0.10)',
+        soft: '0 10px 30px rgba(0,0,0,0.06)',
       },
       keyframes: {
         fadeUp: {
-          from: { opacity: '0', transform: 'translateY(24px)' },
-          to: { opacity: '1', transform: 'translateY(0)' },
+          from: {
+            opacity: '0',
+            transform: 'translateY(18px)'
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)'
+          },
         },
-        navIn: {
-          from: { opacity: '0', transform: 'translateX(-50%) translateY(-20px)' },
-          to: { opacity: '1', transform: 'translateX(-50%) translateY(0)' },
-        },
-        blobFloat: {
-          '0%': { transform: 'translate(0,0) scale(1)' },
-          '100%': { transform: 'translate(30px,20px) scale(1.05)' },
-        },
-        spin: { to: { transform: 'rotate(360deg)' } },
       },
       animation: {
-        fadeUp: 'fadeUp 0.8s both',
-        navIn: 'navIn 0.7s cubic-bezier(0.16,1,0.3,1) both',
-        blob: 'blobFloat 12s ease-in-out infinite alternate',
-        spin: 'spin 0.8s linear infinite',
+        fadeUp: 'fadeUp 0.7s both'
       },
     },
   },

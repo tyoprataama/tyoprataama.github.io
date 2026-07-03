@@ -38,16 +38,16 @@ export default function ImageInput({ value, onChange, label = 'Gambar' }) {
   }
 
   const field =
-    'rounded-sm2 border border-black/10 bg-white/80 px-3 py-2 text-[0.88rem] outline-none focus:border-accent-blue'
+    'rounded-sm2 border border-line bg-surface text-ink placeholder:text-ink-muted px-3 py-2 text-[0.88rem] outline-none focus:border-accent'
 
   return (
-    <div className="rounded-sm2 border border-black/10 bg-white/60 p-3">
+    <div className="rounded-sm2 border border-line bg-panel p-3">
       <div className="mb-2 text-[0.72rem] font-medium uppercase tracking-wider text-ink-muted">{label}</div>
 
       {value && (
         <div className="mb-2 flex items-center gap-3">
           <img src={resolveImageSrc(value)} alt="" className="h-16 w-16 rounded-md object-cover" />
-          <button type="button" onClick={() => onChange('')} className="text-[0.78rem] text-accent-red">
+          <button type="button" onClick={() => onChange('')} className="text-[0.78rem] text-[#e5484d]">
             Hapus gambar
           </button>
         </div>
@@ -65,14 +65,14 @@ export default function ImageInput({ value, onChange, label = 'Gambar' }) {
             type="button"
             disabled={busy}
             onClick={() => fileRef.current?.click()}
-            className="rounded-[20px] border border-black/10 px-4 py-1.5 text-[0.8rem] disabled:opacity-60"
+            className="rounded-[20px] border border-line px-4 py-1.5 text-[0.8rem] disabled:opacity-60"
           >
             {busy ? 'Mengupload…' : '⬆ Upload ke Storage'}
           </button>
           <span className="text-[0.72rem] text-ink-muted">maks 5 MB</span>
           <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
         </div>
-        {err && <p className="text-[0.78rem] text-accent-red">{err}</p>}
+        {err && <p className="text-[0.78rem] text-[#e5484d]">{err}</p>}
       </div>
     </div>
   )
