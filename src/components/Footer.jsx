@@ -21,7 +21,7 @@ export default function Footer() {
       <div className="wrap row">
         <div className="c">
          Tyo Putra · Made with 💙 © 2026 {
-           lastUpdate && ` · Last update: ${lastUpdate}`
+           lastUpdate && ` · Last update : ${lastUpdate}`
          }
         </div>
         <div className="s">
