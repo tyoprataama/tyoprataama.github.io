@@ -1,7 +1,20 @@
 // Static portfolio content (projects + experience + skills).
-export const projects = [{
+export const projects = [
+  {
     featured: true,
     number: '01',
+    tags: [{
+      label: 'Analytic',
+      color: 'coral'
+    }],
+    title: 'Keuanganku — Personal Finance Tracker & Reporting Dashboard',
+    desc: "Web application for tracking personal income and expenses, built with authentication and a demo mode featuring dummy data for instant exploration. Keuanganku transforms raw financial entries into clear, actionable insights through interactive dashboards, helping users monitor cash flow, spending categories, and financial trends over time. Designed with a focus on data clarity and usability, the app demonstrates end-to-end skills in data modeling, secure authentication, and business-style reporting.",
+    tech: ['Web', 'Data Modeling', 'Financial Tracking'],
+    links: 'https://tyoprataama.github.io/finance',
+  }, 
+  {
+    featured: true,
+    number: '02',
     tags: [{
         label: 'Analytic',
         color: 'coral'
@@ -11,14 +24,14 @@ export const projects = [{
         color: 'mint'
       },
     ],
-    title: 'Field Management Resource',
+    title: 'Taniku - Field Management Resource',
     desc: 'Built interactive data models and visual farm reports called Taniku. Integrated multiple data sources to support operational decision making and business performance monitoring.',
     tech: ['Web', 'Data Modeling', 'Business Reporting'],
     links: 'https://tyoprataama.github.io/project',
   },
   {
     featured: true,
-    number: '02',
+    number: '03',
     tags: [{
       label: 'Team Project',
       color: 'blue'
@@ -29,7 +42,7 @@ export const projects = [{
   },
   {
     featured: true,
-    number: '03',
+    number: '04',
     tags: [{
         label: 'Web',
         color: 'mint'
