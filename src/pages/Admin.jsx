@@ -1,4 +1,8 @@
-import { useEffect, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import {
   tagColorClass,
@@ -16,6 +20,7 @@ import {
   updateArticle,
   deleteArticle,
 } from '../api/articles.js'
+import Pagination from '../components/Pagination.jsx'
 
 const EMPTY = {
   title: '', slug: '', subtitle: '', date: '', time: '', readTime: '',
@@ -148,77 +153,219 @@ function ArticleForm({ initial, onSave, onCancel }) {
 // ── Dashboard ───────────────────────────────────────────
 function Dashboard() {
   const { logout } = useAuth()
+
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState(null) // object utk edit/baru, atau null
+  const [editing, setEditing] = useState(null)
 
-  const load = () => { setLoading(true); fetchArticles().then(setList).finally(() => setLoading(false)) }
+  const [filter, setFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const ITEMS_PER_PAGE = 5
+
+  const load = () => {
+    setLoading(true)
+
+    fetchArticles()
+      .then(setList)
+      .finally(() => setLoading(false))
+  }
+
   useEffect(load, [])
 
   const handleSave = async (form) => {
-    if (form.id) await updateArticle(form.id, form)
-    else await createArticle(form)
-    setEditing(null); load()
-  }
-  const handleDelete = async (a) => {
-    if (!confirm(`Hapus "${a.title}"?`)) return
-    await deleteArticle(a.id); load()
+    if (form.id) {
+      await updateArticle(form.id, form)
+    } else {
+      await createArticle(form)
+    }
+
+    setEditing(null)
+    setCurrentPage(1)
+    load()
   }
 
-  if (editing) return (
-    <main className="relative z-[1] mx-auto max-w-[760px] px-6 pb-24 pt-28">
-      <ArticleForm initial={editing} onSave={handleSave} onCancel={() => setEditing(null)} />
-    </main>
+  const handleDelete = async (a) => {
+    if (!confirm(`Hapus "${a.title}"?`)) return
+
+    await deleteArticle(a.id)
+
+    load()
+  }
+
+  // Filter berdasarkan tema.
+  const filteredList = useMemo(() => {
+    const result =
+      filter === 'all'
+        ? list
+        : list.filter((a) => a.tag === filter)
+
+    return sortPinnedThenDate(result)
+  }, [list, filter])
+
+  // Hitung jumlah halaman.
+  const totalPages = Math.ceil(
+    filteredList.length / ITEMS_PER_PAGE,
   )
+
+  // Ambil artikel sesuai halaman aktif.
+  const paginatedList = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+
+    return filteredList.slice(
+      startIndex,
+      startIndex + ITEMS_PER_PAGE,
+    )
+  }, [filteredList, currentPage])
+
+  // Ketika filter berubah → kembali ke page 1.
+  const handleFilterChange = (tag) => {
+    setFilter(tag)
+    setCurrentPage(1)
+  }
+
+  // Jika setelah delete artikel halaman aktif sudah tidak tersedia,
+  // pindahkan user ke halaman terakhir yang masih valid.
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
+
+  if (editing) {
+    return (
+      <main className="relative z-[1] mx-auto max-w-[760px] px-6 pb-24 pt-28">
+        <ArticleForm
+          initial={editing}
+          onSave={handleSave}
+          onCancel={() => setEditing(null)}
+        />
+      </main>
+    )
+  }
 
   return (
     <main className="relative z-[1] mx-auto max-w-[900px] px-6 pb-24 pt-28">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-  <div>
-    <h1 className="font-serif text-[1.7rem] text-ink sm:text-[2rem]">Dashboard</h1>
-    <p className="text-[0.9rem] text-ink-secondary">{list.length} artikel.</p>
-  </div>
-  <div className="flex gap-2">
-    <button onClick={() => setEditing({ ...EMPTY })} className="rounded-[30px] bg-ink px-3.5 py-2 text-[0.8rem] font-medium text-paper sm:px-5 sm:py-2.5 sm:text-[0.85rem]">+ Artikel Baru</button>
-    <button onClick={logout} className="rounded-[30px] border border-line bg-surface text-ink px-3.5 py-2 text-[0.8rem] font-medium sm:px-5 sm:py-2.5 sm:text-[0.85rem]">Keluar</button>
-  </div>
-</div>
+      {/* Header */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-[1.7rem] text-ink sm:text-[2rem]">
+            Dashboard
+          </h1>
 
-      {loading ? (
-  <p className="text-ink-muted">Memuat…</p>
-) : (
-  <div className="flex flex-col gap-2.5">
-    {sortPinnedThenDate(list).map((a) => (
-      <div
-        key={a.id}
-        className="glass flex flex-col gap-3 rounded-card p-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5"
-      >
-        <div className="min-w-0">
-          <div className="mb-1.5 flex flex-wrap items-center gap-2">
-            {a.isPinned && <span className="text-[0.72rem] text-accent-amber">📌 Pinned</span>}
-            <span className={`rounded-[20px] px-2.5 py-1 text-[0.65rem] font-medium uppercase ${tagColorClass(colorForTag(a.tag))}`}>
-              {a.tag}
-            </span>
-            <span className="text-[0.75rem] text-ink-muted">{dateTimeLabel(a)}</span>
-          </div>
-          <h3 className="truncate text-[0.95rem] font-medium text-ink">{a.title}</h3>
+          <p className="text-[0.9rem] text-ink-secondary">
+            {filteredList.length} artikel
+            {filter !== 'all' && ` · ${filter}`}
+          </p>
         </div>
-        <div className="flex flex-shrink-0 gap-2">
+
+        <div className="flex gap-2">
           <button
-            onClick={() => setEditing(a)}
-            className="rounded-[20px] border border-accent/30 px-4 py-1.5 text-[0.8rem] font-medium text-accent">
-            Edit
+            onClick={() => setEditing({ ...EMPTY })}
+            className="rounded-[30px] bg-ink px-3.5 py-2 text-[0.8rem] font-medium text-paper sm:px-5 sm:py-2.5 sm:text-[0.85rem]"
+          >
+            + Artikel Baru
           </button>
+
           <button
-            onClick={() => handleDelete(a)}
-            className="rounded-[20px] border border-[#e5484d]/30 px-4 py-1.5 text-[0.8rem] font-medium text-[#e5484d]">
-            Hapus
+            onClick={logout}
+            className="rounded-[30px] border border-line bg-surface px-3.5 py-2 text-[0.8rem] font-medium text-ink sm:px-5 sm:py-2.5 sm:text-[0.85rem]"
+          >
+            Keluar
           </button>
         </div>
       </div>
-    ))}
-  </div>
-)}
+
+      {/* Theme Filters */}
+      <div className="mb-5 flex flex-wrap gap-2">
+        {['all', ...TAGS].map((tag) => (
+          <button
+            key={tag}
+            type="button"
+            onClick={() => handleFilterChange(tag)}
+            className={`rounded-full border px-4 py-1.5 text-[0.8rem] transition-all ${
+              filter === tag
+                ? 'border-transparent bg-ink text-paper'
+                : 'border-line bg-surface text-ink-secondary hover:border-line2 hover:text-ink'
+            }`}
+          >
+            {tag === 'all' ? 'Semua' : tag}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <p className="text-ink-muted">
+          Memuat…
+        </p>
+      ) : filteredList.length === 0 ? (
+        <div className="rounded-card border border-line py-16 text-center text-ink-muted">
+          Belum ada artikel di kategori ini.
+        </div>
+      ) : (
+        <>
+          {/* Article list */}
+          <div className="flex flex-col gap-2.5">
+            {paginatedList.map((a) => (
+              <div
+                key={a.id}
+                className="glass flex flex-col gap-3 rounded-card p-4 shadow-card sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5"
+              >
+                <div className="min-w-0">
+                  <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                    {a.isPinned && (
+                      <span className="text-[0.72rem] text-accent-amber">
+                        📌 Pinned
+                      </span>
+                    )}
+
+                    <span
+                      className={`rounded-[20px] px-2.5 py-1 text-[0.65rem] font-medium uppercase ${tagColorClass(
+                        colorForTag(a.tag),
+                      )}`}
+                    >
+                      {a.tag}
+                    </span>
+
+                    <span className="text-[0.75rem] text-ink-muted">
+                      {dateTimeLabel(a)}
+                    </span>
+                  </div>
+
+                  <h3 className="truncate text-[0.95rem] font-medium text-ink">
+                    {a.title}
+                  </h3>
+                </div>
+
+                <div className="flex flex-shrink-0 gap-2">
+                  <button
+                    onClick={() => setEditing(a)}
+                    className="rounded-[20px] border border-accent/30 px-4 py-1.5 text-[0.8rem] font-medium text-accent"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(a)}
+                    className="rounded-[20px] border border-[#e5484d]/30 px-4 py-1.5 text-[0.8rem] font-medium text-[#e5484d]"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredList.length}
+            itemsPerPage={ITEMS_PER_PAGE}
+            onPageChange={setCurrentPage}
+/>
+        </>
+      )}
     </main>
   )
 }
