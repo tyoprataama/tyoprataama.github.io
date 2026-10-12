@@ -38,15 +38,38 @@ export default function Home() {
   const previousPages = useRef({ projectPage, experiencePage })
   const ITEMS_PER_PAGE = 3
 
-  const changeProjectPage = page => { if (page !== projectPage) savedScrollY.current = window.scrollY; setProjectPage(page) }
-  const changeExperiencePage = page => { if (page !== experiencePage) savedScrollY.current = window.scrollY; setExperiencePage(page) }
-  useLayoutEffect(() => {
-    if (savedScrollY.current !== null && (previousPages.current.projectPage !== projectPage || previousPages.current.experiencePage !== experiencePage)) {
-      window.scrollTo(0, savedScrollY.current)
-      savedScrollY.current = null
-    }
-    previousPages.current = { projectPage, experiencePage }
-  }, [projectPage, experiencePage])
+  
+
+const changeProjectPage = page => {
+  if (page === projectPage) return;
+
+  savedScrollY.current = null;
+  setProjectPage(page);
+
+  requestAnimationFrame(() => {
+    document.getElementById('work')?.scrollIntoView({
+      behavior: 'auto',
+      block: 'start',
+    });
+  });
+};
+
+const changeExperiencePage = page => {
+  if (page === experiencePage) return;
+
+  savedScrollY.current = null;
+  setExperiencePage(page);
+
+  requestAnimationFrame(() => {
+    document.getElementById('experience')?.scrollIntoView({
+      behavior: 'auto',
+      block: 'start',
+    });
+  });
+};
+
+
+
 
   useEffect(() => {
     fetchArticles().then(setArticles).catch(console.error)
