@@ -44,7 +44,11 @@ export function collectImageUrls(article) {
 // Hapus daftar URL dari bucket (hanya yang memang file bucket kita).
 export async function deleteStorageUrls(urls) {
   const paths = (urls || []).map(storagePathFromUrl).filter(Boolean)
-  if (paths.length === 0) return
+  if (paths.length === 0) return true
   const { error } = await supabase.storage.from(BUCKET).remove(paths)
-  if (error) console.error('Gagal hapus file storage:', error.message)
+  if (error) {
+    console.error('Gagal hapus file storage:', error.message)
+    return false
+  }
+  return true
 }

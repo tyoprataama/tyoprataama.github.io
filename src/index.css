@@ -903,3 +903,14 @@ body::before {
     animation: none;
   }
 }
+
+
+/* Prevent iOS Safari from zooming when a form control receives focus. */
+@media (max-width: 767px) {
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

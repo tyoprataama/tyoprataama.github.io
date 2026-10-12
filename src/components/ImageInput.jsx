@@ -8,11 +8,10 @@ const MAX_BYTES = 5 * 1024 * 1024 // batas 5 MB (ubah sesuai kebutuhan)
 //  - Upload file dari device → disimpan di Supabase Storage (bucket), DB hanya simpan URL-nya.
 //  - Tempel link gambar (mis. Google Drive) yang otomatis ter-render.
 // Catatan: penghapusan file bucket ditangani di api/articles.js saat artikel disimpan/dihapus.
-export default function ImageInput({ value, onChange, onUploaded, label = 'Gambar' }) {
+export default function ImageInput({ value, onChange, onUploaded, onRemove, label = 'Gambar' }) {
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const fileRef = useRef(null)
-
 
   const onFile = async (e) => {
     const file = e.target.files?.[0]
@@ -39,6 +38,16 @@ export default function ImageInput({ value, onChange, onUploaded, label = 'Gamba
     }
   }
 
+  const removeImage = async () => {
+    setErr('')
+    try {
+      if (onRemove) await onRemove(value)
+      else onChange('')
+    } catch (removeError) {
+      setErr('Gagal menghapus gambar: ' + (removeError?.message || removeError))
+    }
+  }
+
   const previewSrc = value && !/^(https?:|data:|blob:|\/)/i.test(value)
     ? `${import.meta.env.BASE_URL}${value}`
     : resolveImageSrc(value)
@@ -53,7 +62,7 @@ export default function ImageInput({ value, onChange, onUploaded, label = 'Gamba
       {value && (
         <div className="mb-2 flex items-center gap-3">
           <img src={previewSrc} alt="" className="h-16 w-16 rounded-md object-cover" />
-          <button type="button" onClick={() => onChange('')} className="text-[0.78rem] text-[#e5484d]">
+          <button type="button" disabled={busy} onClick={removeImage} className="text-[0.78rem] text-[#e5484d] disabled:opacity-50">
             Hapus gambar
           </button>
         </div>

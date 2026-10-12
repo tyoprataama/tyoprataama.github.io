@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useReveal from '../hooks/useReveal.js'
 import { fetchArticles } from '../api/articles.js'
@@ -8,6 +8,19 @@ import { sortPinnedThenDate, getExcerpt } from '../lib/helpers.js'
 import Pagination from '../components/Pagination.jsx'
 import StaticPagination from '../components/StaticPagination.jsx'
 import { resolveImageSrc } from '../lib/helpers.js'
+
+function renderHeroTitle(text) {
+  const parts = String(text || '').split(/(#.*?#|\*.*?\*)/g).filter(Boolean)
+  return parts.map((part, index) => {
+    if (part.startsWith('#') && part.endsWith('#') && part.length > 2) {
+      return <em key={index}>{part.slice(1, -1)}</em>
+    }
+    if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+      return <em key={index} className="u">{part.slice(1, -1)}</em>
+    }
+    return <span key={index}>{part}</span>
+  })
+}
 
 const scrollTo = (id) => (e) => {
   e.preventDefault()
@@ -21,7 +34,19 @@ export default function Home() {
   const [experiences, setExperiences] = useState(staticExperiences)
   const [projectPage, setProjectPage] = useState(1)
   const [experiencePage, setExperiencePage] = useState(1)
+  const savedScrollY = useRef(null)
+  const previousPages = useRef({ projectPage, experiencePage })
   const ITEMS_PER_PAGE = 3
+
+  const changeProjectPage = page => { if (page !== projectPage) savedScrollY.current = window.scrollY; setProjectPage(page) }
+  const changeExperiencePage = page => { if (page !== experiencePage) savedScrollY.current = window.scrollY; setExperiencePage(page) }
+  useLayoutEffect(() => {
+    if (savedScrollY.current !== null && (previousPages.current.projectPage !== projectPage || previousPages.current.experiencePage !== experiencePage)) {
+      window.scrollTo(0, savedScrollY.current)
+      savedScrollY.current = null
+    }
+    previousPages.current = { projectPage, experiencePage }
+  }, [projectPage, experiencePage])
 
   useEffect(() => {
     fetchArticles().then(setArticles).catch(console.error)
@@ -53,10 +78,10 @@ export default function Home() {
       <div className="wrap hero-grid">
         <div>
           <div className="lead-eyebrow fade"><span className="dot" /><span className="eyebrow">{hero.eyebrow}</span></div>
-          <h1 className="fade hero-title">{hero.titleText || [hero.titleLine1, hero.titleLine2, hero.emphasis1, hero.titleLine3, hero.emphasis2].filter(Boolean).join(' ')}</h1>
+          <h1 className="fade hero-title">{renderHeroTitle(hero.titleText || [hero.titleLine1, hero.titleLine2, hero.emphasis1, hero.titleLine3, hero.emphasis2].filter(Boolean).join(' '))}</h1>
           <p className="sub fade">{hero.subtitle}</p>
           <div className="actions fade">
-            <a href="#work" className="btn btn-solid" onClick={scrollTo('contact')}>{hero.workButton} <span className="arw">↗</span></a>
+            <a href="#work" className="btn btn-solid" onClick={scrollTo('work')}>{hero.workButton} <span className="arw">↗</span></a>
             <Link to="/blog" className="btn btn-line">{hero.blogButton}</Link>
           </div>
         </div>
@@ -76,7 +101,7 @@ export default function Home() {
           {p.links && <a className="btn btn-line wbtn" href={p.links} target="_blank" rel="noreferrer">View project <span className="arw">↗</span></a>}
         </div><div className="wnum">{String((projectPage - 1) * ITEMS_PER_PAGE + i + 1).padStart(2, '0')}</div>
       </div>)}</div>
-      <StaticPagination currentPage={projectPage} totalPages={projectPages} onPageChange={setProjectPage} />
+      <StaticPagination currentPage={projectPage} totalPages={projectPages} onPageChange={changeProjectPage} />
     </div></section>
 
     <section className="section" id="about"><div className="wrap">
@@ -89,7 +114,7 @@ export default function Home() {
     <section className="section" id="experience"><div className="wrap">
       <div className="shead sr"><h2>Experience</h2><span className="no">03 / Journey</span></div>
       <div>{visibleExperiences.map((ex, i) => <div className="exp sr" key={ex.id || `${ex.title}-${i}`}><div className="when">{ex.period}</div><div><div className="role">{ex.title}</div><div className="org">{ex.company}</div><div className="desc">{ex.desc}</div></div></div>)}</div>
-      <StaticPagination currentPage={experiencePage} totalPages={experiencePages} onPageChange={setExperiencePage} />
+      <StaticPagination currentPage={experiencePage} totalPages={experiencePages} onPageChange={changeExperiencePage} />
     </div></section>
 
     {latest.length > 0 && <section className="section" id="writing"><div className="wrap">
@@ -99,7 +124,7 @@ export default function Home() {
     </div></section>}
 
     <section className="contact" id="contact"><div className="wrap">
-      <div className="avatar sr"><img src={String(contact.profileImage || '').startsWith('http') ? resolveImageSrc(contact.profileImage) : `${import.meta.env.BASE_URL}${String(contact.profileImage || 'assets/profile.JPG').replace(/^\//, '')}`} alt="Profile" onError={e => { e.currentTarget.style.display = 'none' }} /></div>
+      {contact.profileImage && <div className="avatar sr"><img src={String(contact.profileImage).startsWith('http') ? resolveImageSrc(contact.profileImage) : `${import.meta.env.BASE_URL}${String(contact.profileImage).replace(/^\//, '')}`} alt="Profile" onError={e => { e.currentTarget.style.display = 'none' }} /></div>}
       <span className="eyebrow sr">{contact.eyebrow}</span><h2 className="sr">{contact.titleLead} <em>{contact.titleEmphasis}</em></h2><br />
       <a href={`mailto:${contact.email}`} className="mail sr">{contact.email}</a>
     </div></section>
