@@ -40,7 +40,7 @@ const toRow = (a) => ({
 
 export async function fetchArticles() {
   const { data, error } = await supabase
-    .from('articles')
+    .from('home_articles')
     .select('*')
     .order('sort_order', { ascending: false })
   if (error) throw error
@@ -49,7 +49,7 @@ export async function fetchArticles() {
 
 export async function fetchArticleBySlug(slug) {
   const { data, error } = await supabase
-    .from('articles')
+    .from('home_articles')
     .select('*')
     .eq('slug', slug)
     .maybeSingle()
@@ -60,7 +60,7 @@ export async function fetchArticleBySlug(slug) {
 // Waktu artikel terakhir ditambah/diedit — untuk footer "Last update".
 export async function fetchLastUpdated() {
   const { data, error } = await supabase
-    .from('articles')
+    .from('home_articles')
     .select('updated_at')
     .order('updated_at', { ascending: false })
     .limit(1)
@@ -71,7 +71,7 @@ export async function fetchLastUpdated() {
 
 export async function createArticle(article) {
   const { data, error } = await supabase
-    .from('articles')
+    .from('home_articles')
     .insert(toRow(article))
     .select()
     .single()
@@ -82,13 +82,13 @@ export async function createArticle(article) {
 export async function updateArticle(id, article) {
   // Ambil data lama untuk membandingkan gambar yang dibuang/diganti.
   const { data: oldRow } = await supabase
-    .from('articles')
+    .from('home_articles')
     .select('*')
     .eq('id', id)
     .maybeSingle()
 
   const { data, error } = await supabase
-    .from('articles')
+    .from('home_articles')
     .update(toRow(article))
     .eq('id', id)
     .select()
@@ -108,12 +108,12 @@ export async function updateArticle(id, article) {
 export async function deleteArticle(id) {
   // Ambil dulu agar tahu gambar mana yang harus dibersihkan dari bucket.
   const { data: row } = await supabase
-    .from('articles')
+    .from('home_articles')
     .select('*')
     .eq('id', id)
     .maybeSingle()
 
-  const { error } = await supabase.from('articles').delete().eq('id', id)
+  const { error } = await supabase.from('home_articles').delete().eq('id', id)
   if (error) throw error
 
   if (row) await deleteStorageUrls(collectImageUrls(fromRow(row)))
