@@ -21,6 +21,7 @@ import {
   deleteArticle,
 } from '../api/articles.js'
 import Pagination from '../components/Pagination.jsx'
+import HomeManager from './HomeManager.jsx'
 
 const EMPTY = {
   title: '', slug: '', subtitle: '', date: '', time: '', readTime: '',
@@ -157,6 +158,7 @@ function Dashboard() {
   const [list, setList] = useState([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(null)
+  const [showHomeManager, setShowHomeManager] = useState(false)
 
   const [filter, setFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -232,6 +234,10 @@ function Dashboard() {
     }
   }, [currentPage, totalPages])
 
+  if (showHomeManager) {
+    return <HomeManager onBack={() => setShowHomeManager(false)} onLogout={logout} />
+  }
+
   if (editing) {
     return (
       <main className="relative z-[1] mx-auto max-w-[760px] px-6 pb-24 pt-28">
@@ -259,7 +265,13 @@ function Dashboard() {
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setShowHomeManager(true)}
+            className="rounded-[30px] border border-line bg-surface px-3.5 py-2 text-[0.8rem] font-medium text-ink sm:px-5 sm:py-2.5 sm:text-[0.85rem]"
+          >
+            Kelola Home
+          </button>
           <button
             onClick={() => setEditing({ ...EMPTY })}
             className="rounded-[30px] bg-ink px-3.5 py-2 text-[0.8rem] font-medium text-paper sm:px-5 sm:py-2.5 sm:text-[0.85rem]"

@@ -8,10 +8,11 @@ const MAX_BYTES = 5 * 1024 * 1024 // batas 5 MB (ubah sesuai kebutuhan)
 //  - Upload file dari device → disimpan di Supabase Storage (bucket), DB hanya simpan URL-nya.
 //  - Tempel link gambar (mis. Google Drive) yang otomatis ter-render.
 // Catatan: penghapusan file bucket ditangani di api/articles.js saat artikel disimpan/dihapus.
-export default function ImageInput({ value, onChange, label = 'Gambar' }) {
+export default function ImageInput({ value, onChange, onUploaded, label = 'Gambar' }) {
   const [err, setErr] = useState('')
   const [busy, setBusy] = useState(false)
   const fileRef = useRef(null)
+
 
   const onFile = async (e) => {
     const file = e.target.files?.[0]
@@ -29,6 +30,7 @@ export default function ImageInput({ value, onChange, label = 'Gambar' }) {
     try {
       const url = await uploadImage(file)
       onChange(url) // simpan URL publik, bukan base64
+      if (onUploaded) await onUploaded(url)
     } catch (e2) {
       setErr('Gagal upload: ' + (e2?.message || e2))
     } finally {
@@ -36,6 +38,10 @@ export default function ImageInput({ value, onChange, label = 'Gambar' }) {
       if (fileRef.current) fileRef.current.value = ''
     }
   }
+
+  const previewSrc = value && !/^(https?:|data:|blob:|\/)/i.test(value)
+    ? `${import.meta.env.BASE_URL}${value}`
+    : resolveImageSrc(value)
 
   const field =
     'rounded-sm2 border border-line bg-surface text-ink placeholder:text-ink-muted px-3 py-2 text-[0.88rem] outline-none focus:border-accent'
@@ -46,7 +52,7 @@ export default function ImageInput({ value, onChange, label = 'Gambar' }) {
 
       {value && (
         <div className="mb-2 flex items-center gap-3">
-          <img src={resolveImageSrc(value)} alt="" className="h-16 w-16 rounded-md object-cover" />
+          <img src={previewSrc} alt="" className="h-16 w-16 rounded-md object-cover" />
           <button type="button" onClick={() => onChange('')} className="text-[0.78rem] text-[#e5484d]">
             Hapus gambar
           </button>
