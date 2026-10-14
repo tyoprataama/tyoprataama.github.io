@@ -104,7 +104,7 @@ const changeExperiencePage = page => {
           <h1 className="fade hero-title">{renderHeroTitle(hero.titleText || [hero.titleLine1, hero.titleLine2, hero.emphasis1, hero.titleLine3, hero.emphasis2].filter(Boolean).join(' '))}</h1>
           <p className="sub fade">{hero.subtitle}</p>
           <div className="actions fade">
-            <a href="#work" className="btn btn-solid" onClick={scrollTo('work')}>{hero.workButton} <span className="arw">↗</span></a>
+            <a href="#work" className="btn btn-solid" onClick={scrollTo('contact')}>{hero.workButton} <span className="arw">↗</span></a>
             <Link to="/blog" className="btn btn-line">{hero.blogButton}</Link>
           </div>
         </div>
