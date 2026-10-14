@@ -8,6 +8,7 @@ import { sortPinnedThenDate, getExcerpt } from '../lib/helpers.js'
 import Pagination from '../components/Pagination.jsx'
 import StaticPagination from '../components/StaticPagination.jsx'
 import { resolveImageSrc } from '../lib/helpers.js'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 function renderHeroTitle(text) {
   const parts = String(text || '').split(/(#.*?#|\*.*?\*)/g).filter(Boolean)
@@ -28,6 +29,9 @@ const scrollTo = (id) => (e) => {
 }
 
 export default function Home() {
+  const { language } = useLanguage()
+  const isEn = language === 'en'
+  const localized = (obj, key) => obj?.[isEn ? key : `${key}Id`] || obj?.[key] || ''
   const [articles, setArticles] = useState([])
   const [content, setContent] = useState(DEFAULT_HOME_CONTENT)
   const [projects, setProjects] = useState(staticProjects)
@@ -76,13 +80,13 @@ const changeExperiencePage = page => {
     fetchHomeContent().then(setContent).catch(console.error)
     fetchProjects().then(rows => {
       if (rows.length) { setProjects(rows.filter(p => p.isVisible).map(p => ({
-        id: p.id, title: p.title, desc: p.description, tech: p.stack || [], links: p.projectUrl,
+        id: p.id, title: p.title, titleId: p.titleId, desc: p.description, descId: p.descriptionId, categoryId: p.categoryId, tech: p.stack || [], links: p.projectUrl,
         category: p.category, imageUrl: p.imageUrl, isPinned: p.isPinned, sortOrder: p.sortOrder,
       }))); setProjectPage(1) }
     }).catch(console.error)
     fetchExperiences().then(rows => {
       if (rows.length) { setExperiences(rows.filter(e => e.isVisible).map(e => ({
-        id: e.id, title: e.role, company: e.company, period: e.period, desc: e.description, isPinned: e.isPinned, sortOrder: e.sortOrder,
+        id: e.id, title: e.role, titleId: e.roleId, company: e.company, companyId: e.companyId, period: e.period, periodId: e.periodId, desc: e.description, descId: e.descriptionId, isPinned: e.isPinned, sortOrder: e.sortOrder,
       }))); setExperiencePage(1) }
     }).catch(console.error)
   }, [])
@@ -100,55 +104,55 @@ const changeExperiencePage = page => {
     <section className="hero" id="home">
       <div className="wrap hero-grid">
         <div>
-          <div className="lead-eyebrow fade"><span className="dot" /><span className="eyebrow">{hero.eyebrow}</span></div>
-          <h1 className="fade hero-title">{renderHeroTitle(hero.titleText || [hero.titleLine1, hero.titleLine2, hero.emphasis1, hero.titleLine3, hero.emphasis2].filter(Boolean).join(' '))}</h1>
-          <p className="sub fade">{hero.subtitle}</p>
+          <div className="lead-eyebrow fade"><span className="dot" /><span className="eyebrow">{localized(hero, 'eyebrow')}</span></div>
+          <h1 className="fade hero-title">{renderHeroTitle(localized(hero, 'titleText') || [hero.titleLine1, hero.titleLine2, hero.emphasis1, hero.titleLine3, hero.emphasis2].filter(Boolean).join(' '))}</h1>
+          <p className="sub fade">{localized(hero, 'subtitle')}</p>
           <div className="actions fade">
-            <a href="#work" className="btn btn-solid" onClick={scrollTo('contact')}>{hero.workButton} <span className="arw">↗</span></a>
-            <Link to="/blog" className="btn btn-line">{hero.blogButton}</Link>
+            <a href="#work" className="btn btn-solid" onClick={scrollTo('contact')}>{localized(hero, 'workButton')} <span className="arw">↗</span></a>
+            <Link to="/blog" className="btn btn-line">{localized(hero, 'blogButton')}</Link>
           </div>
         </div>
         <aside className="fade">
-          <div className="meta"><div className="k">Based in</div><div className="v">{hero.basedIn}</div></div>
-          <div className="meta"><div className="k">Focus</div><div className="v">{hero.focus}</div></div>
+          <div className="meta"><div className="k">{isEn ? 'Based in' : 'Berlokasi di'}</div><div className="v">{localized(hero, 'basedIn')}</div></div>
+          <div className="meta"><div className="k">{isEn ? 'Focus' : 'Fokus'}</div><div className="v">{localized(hero, 'focus')}</div></div>
         </aside>
       </div>
     </section>
     <div className="wrap"><hr className="rule" /></div>
 
     <section className="section" id="work"><div className="wrap">
-      <div className="shead sr"><h2>Selected work</h2><span className="no">01 / Projects</span></div>
+      <div className="shead sr"><h2>{isEn ? 'Selected work' : 'Pekerjaan pilihan'}</h2><span className="no">01 / {isEn ? 'Projects' : 'Proyek'}</span></div>
       <div>{visibleProjects.map((p, i) => <div className="work-item sr" key={p.id || p.title || i}>
-        <div className="wmain"><h3>{p.title}</h3>{p.category && <p className="text-xs uppercase tracking-wide text-ink-muted">{p.category}</p>}<p>{p.desc}</p>
+        <div className="wmain"><h3>{!isEn && p.titleId ? p.titleId : p.title}</h3>{(!isEn && p.categoryId ? p.categoryId : p.category) && <p className="text-xs uppercase tracking-wide text-ink-muted">{!isEn && p.categoryId ? p.categoryId : p.category}</p>}<p>{!isEn && p.descId ? p.descId : p.desc}</p>
           <div className="stack">{(p.tech || []).map((t) => <span key={t}>{t}</span>)}</div>
-          {p.links && <a className="btn btn-line wbtn" href={p.links} target="_blank" rel="noreferrer">View project <span className="arw">↗</span></a>}
+          {p.links && <a className="btn btn-line wbtn" href={p.links} target="_blank" rel="noreferrer">{isEn ? 'View project' : 'Lihat proyek'} <span className="arw">↗</span></a>}
         </div><div className="wnum">{String((projectPage - 1) * ITEMS_PER_PAGE + i + 1).padStart(2, '0')}</div>
       </div>)}</div>
       <StaticPagination currentPage={projectPage} totalPages={projectPages} onPageChange={changeProjectPage} />
     </div></section>
 
     <section className="section" id="about"><div className="wrap">
-      <div className="shead sr"><h2>About</h2><span className="no">02 / Profile</span></div>
-      <div className="about"><div className="body sr"><p>{about.profile}</p><p className="small">{about.details}</p>
-        <div className="facts">{facts.map((f, i) => <div className="f" key={f.k || i}><div className="k">{f.k}</div><div className="v">{f.v} <small>{f.s}</small></div></div>)}</div>
+      <div className="shead sr"><h2>{isEn ? 'About' : 'Tentang'}</h2><span className="no">02 / {isEn ? 'Profile' : 'Profil'}</span></div>
+      <div className="about"><div className="body sr"><p>{localized(about, 'profile')}</p><p className="small">{localized(about, 'details')}</p>
+        <div className="facts">{facts.map((f, i) => <div className="f" key={f.k || i}><div className="k">{!isEn && f.kId ? f.kId : f.k}</div><div className="v">{!isEn && f.vId ? f.vId : f.v} <small>{!isEn && f.sId ? f.sId : f.s}</small></div></div>)}</div>
       </div></div>
     </div></section>
 
     <section className="section" id="experience"><div className="wrap">
-      <div className="shead sr"><h2>Experience</h2><span className="no">03 / Journey</span></div>
-      <div>{visibleExperiences.map((ex, i) => <div className="exp sr" key={ex.id || `${ex.title}-${i}`}><div className="when">{ex.period}</div><div><div className="role">{ex.title}</div><div className="org">{ex.company}</div><div className="desc">{ex.desc}</div></div></div>)}</div>
+      <div className="shead sr"><h2>{isEn ? 'Experience' : 'Pengalaman'}</h2><span className="no">03 / {isEn ? 'Journey' : 'Perjalanan'}</span></div>
+      <div>{visibleExperiences.map((ex, i) => <div className="exp sr" key={ex.id || `${ex.title}-${i}`}><div className="when">{!isEn && ex.periodId ? ex.periodId : ex.period}</div><div><div className="role">{!isEn && ex.titleId ? ex.titleId : ex.title}</div><div className="org">{!isEn && ex.companyId ? ex.companyId : ex.company}</div><div className="desc">{!isEn && ex.descId ? ex.descId : ex.desc}</div></div></div>)}</div>
       <StaticPagination currentPage={experiencePage} totalPages={experiencePages} onPageChange={changeExperiencePage} />
     </div></section>
 
     {latest.length > 0 && <section className="section" id="writing"><div className="wrap">
-      <div className="shead sr"><h2>Writing</h2><span className="no">04 / Notes</span></div>
-      <div className="writing">{latest.map(a => <Link className="wrow sr" key={a.slug} to={`/blog/${a.slug}`}><div className="wtop"><span className="tag">{a.tag}</span><span className="rt">{a.readTime}</span></div><h3>{a.title}</h3><p className="wex">{getExcerpt(a.body)}</p></Link>)}</div>
-      <Link to="/blog" className="morelink">Read all writing →</Link>
+      <div className="shead sr"><h2>{isEn ? 'Writing' : 'Tulisan'}</h2><span className="no">04 / {isEn ? 'Notes' : 'Catatan'}</span></div>
+      <div className="writing">{latest.map(a => <Link className="wrow sr" key={a.slug} to={`/blog/${a.slug}`}><div className="wtop"><span className="tag">{isEn && a.tagEn ? a.tagEn : a.tag}</span><span className="rt">{parseInt(String(a.readTime || '').match(/\d+/)?.[0] || '0', 10)} {isEn ? 'min read' : 'menit baca'}</span></div><h3>{isEn && a.titleEn ? a.titleEn : a.title}</h3><p className="wex">{getExcerpt(isEn && a.bodyEn?.length ? a.bodyEn : a.body)}</p></Link>)}</div>
+      <Link to="/blog" className="morelink">{isEn ? 'Read all writing →' : 'Baca semua tulisan →'}</Link>
     </div></section>}
 
     <section className="contact" id="contact"><div className="wrap">
       {contact.profileImage && <div className="avatar sr"><img src={String(contact.profileImage).startsWith('http') ? resolveImageSrc(contact.profileImage) : `${import.meta.env.BASE_URL}${String(contact.profileImage).replace(/^\//, '')}`} alt="Profile" onError={e => { e.currentTarget.style.display = 'none' }} /></div>}
-      <span className="eyebrow sr">{contact.eyebrow}</span><h2 className="sr">{contact.titleLead} <em>{contact.titleEmphasis}</em></h2><br />
+      <span className="eyebrow sr">{localized(contact, 'eyebrow')}</span><h2 className="sr">{localized(contact, 'titleLead')} <em>{localized(contact, 'titleEmphasis')}</em></h2><br />
       <a href={`mailto:${contact.email}`} className="mail sr">{contact.email}</a>
     </div></section>
   </>

@@ -18,6 +18,11 @@ const fromRow = (r) => ({
   body: r.body || [],
   sortOrder: r.sort_order,
   updatedAt: r.updated_at,
+  titleEn: r.title_en || '',
+  slugEn: r.slug_en || '',
+  subtitleEn: r.subtitle_en || '',
+  tagEn: r.tag_en || '',
+  bodyEn: Array.isArray(r.body_en) ? r.body_en : [],
 })
 
 // React (camelCase)  ->  DB (snake_case)
@@ -36,6 +41,11 @@ const toRow = (a) => ({
   body: a.body,
   sort_order: a.sortOrder ?? 0,
   updated_at: new Date().toISOString(), // dipakai footer "Last update"
+  title_en: a.titleEn?.trim() || null,
+  slug_en: a.slugEn?.trim() || null,
+  subtitle_en: a.subtitleEn || null,
+  tag_en: a.tagEn || null,
+  body_en: Array.isArray(a.bodyEn) ? a.bodyEn : [],
 })
 
 export async function fetchArticles() {
@@ -48,10 +58,19 @@ export async function fetchArticles() {
 }
 
 export async function fetchArticleBySlug(slug) {
-  const { data, error } = await supabase
+  // Try Indonesian slug first, then the optional English slug.
+  const { data: idData, error: idError } = await supabase
     .from('home_articles')
     .select('*')
     .eq('slug', slug)
+    .maybeSingle()
+  if (idError) throw idError
+  if (idData) return fromRow(idData)
+
+  const { data, error } = await supabase
+    .from('home_articles')
+    .select('*')
+    .eq('slug_en', slug)
     .maybeSingle()
   if (error) throw error
   return data ? fromRow(data) : null

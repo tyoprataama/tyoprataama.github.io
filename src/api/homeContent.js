@@ -58,12 +58,12 @@ export async function saveHomeContent(content) {
 }
 
 const projectFromRow = (r) => ({
-  id: r.id, title: r.title, category: r.category, description: r.description,
+  id: r.id, title: r.title, category: r.category, description: r.description, titleId: r.title_id || '', categoryId: r.category_id || '', descriptionId: r.description_id || '',
   imageUrl: r.image_url, projectUrl: r.project_url, githubUrl: r.github_url,
   stack: r.stack || [], sortOrder: r.sort_order ?? 0, isPinned: r.is_pinned ?? false, isVisible: r.is_visible ?? true,
 })
 const projectToRow = (p, index = 0) => ({
-  title: p.title || '', category: p.category || '', description: p.description || '',
+  title: p.title || '', category: p.category || '', description: p.description || '', title_id: p.titleId || null, category_id: p.categoryId || null, description_id: p.descriptionId || null,
   image_url: p.imageUrl || '', project_url: p.projectUrl || '', github_url: p.githubUrl || '',
   stack: Array.isArray(p.stack) ? p.stack : String(p.stack || '').split(',').map(s => s.trim()).filter(Boolean),
   sort_order: Number(p.sortOrder ?? index), is_pinned: p.isPinned === true, is_visible: p.isVisible !== false,
@@ -89,11 +89,11 @@ export async function deleteProject(id) {
 }
 
 const experienceFromRow = (r) => ({
-  id: r.id, company: r.company, role: r.role, period: r.period, description: r.description,
+  id: r.id, company: r.company, role: r.role, period: r.period, description: r.description, companyId: r.company_id || '', roleId: r.role_id || '', periodId: r.period_id || '', descriptionId: r.description_id || '',
   achievements: r.achievements || [], sortOrder: r.sort_order ?? 0, isPinned: r.is_pinned ?? false, isVisible: r.is_visible ?? true,
 })
 const experienceToRow = (e, index = 0) => ({
-  company: e.company || '', role: e.role || '', period: e.period || '', description: e.description || '',
+  company: e.company || '', role: e.role || '', period: e.period || '', description: e.description || '', company_id: e.companyId || null, role_id: e.roleId || null, period_id: e.periodId || null, description_id: e.descriptionId || null,
   achievements: Array.isArray(e.achievements) ? e.achievements : [],
   sort_order: Number(e.sortOrder ?? index), is_pinned: e.isPinned === true, is_visible: e.isVisible !== false,
 })

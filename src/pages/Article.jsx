@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { fetchArticleBySlug, fetchArticles } from '../api/articles.js'
 import ArticleBody from '../components/ArticleBody.jsx'
 import { tagColorClass, resolveImageSrc, dateTimeLabel } from '../lib/helpers.js'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 function useScrollProgress() {
   const [progress, setProgress] = useState(0)
@@ -21,9 +22,18 @@ function useScrollProgress() {
 
 export default function Article() {
   const { slug } = useParams()
+  const { language } = useLanguage()
   const [article, setArticle] = useState(undefined) // undefined = loading, null = tidak ada
   const [related, setRelated] = useState([])
   const progress = useScrollProgress()
+  const wantsEnglish = language === 'en'
+  const hasEnglishTitle = !!article?.titleEn
+  const hasEnglishBody = Array.isArray(article?.bodyEn) && article.bodyEn.length > 0
+  const showEnglish = wantsEnglish && (hasEnglishTitle || hasEnglishBody || !!article?.subtitleEn)
+  const displayTitle = showEnglish && hasEnglishTitle ? article.titleEn : article?.title
+  const displaySubtitle = showEnglish && article?.subtitleEn ? article.subtitleEn : article?.subtitle
+  const displayTag = showEnglish && article?.tagEn ? article.tagEn : article?.tag
+  const displayBody = showEnglish && hasEnglishBody ? article.bodyEn : article?.body
 
   useEffect(() => {
     let alive = true
@@ -31,7 +41,7 @@ export default function Article() {
       .then((a) => alive && setArticle(a))
       .catch(() => alive && setArticle(null))
     fetchArticles()
-      .then((all) => alive && setRelated(all.filter((a) => a.slug !== slug).slice(0, 3)))
+      .then((all) => alive && setRelated(all.filter((a) => a.slug !== slug && a.slugEn !== slug).slice(0, 3)))
       .catch(console.error)
     return () => {
       alive = false
@@ -39,11 +49,11 @@ export default function Article() {
   }, [slug])
 
   useEffect(() => {
-    if (article) document.title = `${article.title} · Tyo`
+    if (article) document.title = `${(language === 'en' && article.titleEn) ? article.titleEn : article.title} · Tyo`
     return () => {
       document.title = 'Tyo · Portfolio'
     }
-  }, [article])
+  }, [article, language])
 
   if (article === undefined) {
     return (
@@ -54,9 +64,9 @@ export default function Article() {
   if (!article) {
     return (
       <main className="mx-auto max-w-[680px] px-6 py-40 text-center">
-        <h2 className="font-serif text-[2rem] font-normal text-ink">Artikel tidak ditemukan.</h2>
-        <p className="mt-3 text-ink-secondary">Artikel yang Anda cari tidak ada atau sudah dipindahkan.</p>
-        <Link to="/blog" className="mt-6 inline-block font-medium text-accent">← Kembali ke semua tulisan</Link>
+        <h2 className="font-serif text-[2rem] font-normal text-ink">{language === 'en' ? 'Article not found.' : 'Artikel tidak ditemukan.'}</h2>
+        <p className="mt-3 text-ink-secondary">{language === 'en' ? 'The article may have been moved or does not exist.' : 'Artikel yang Anda cari tidak ada atau sudah dipindahkan.'}</p>
+        <Link to="/blog" className="mt-6 inline-block font-medium text-accent">← {language === 'en' ? 'Back to all writing' : 'Kembali ke semua tulisan'}</Link>
       </main>
     )
   }
@@ -71,29 +81,33 @@ export default function Article() {
       <article className="mx-auto max-w-[680px] animate-fadeUp px-6 pb-28 pt-36">
         {/* Breadcrumb */}
         <div className="mb-10 flex items-center gap-2 text-[0.78rem] text-ink-muted">
-          <Link to="/" className="transition-colors hover:text-ink">Home</Link>
+          <Link to="/blog" aria-label={language === 'en' ? 'Back to articles' : 'Kembali ke daftar tulisan'} className="mr-2 inline-flex h-8 w-8 items-center justify-center rounded-full border border-line text-base text-ink transition-colors hover:bg-panel">←</Link>
+          <Link to="/" className="transition-colors hover:text-ink">{language === 'en' ? 'Home' : 'Beranda'}</Link>
           <span className="text-[0.65rem]">›</span>
-          <Link to="/blog" className="transition-colors hover:text-ink">Writing</Link>
+          <Link to="/blog" className="transition-colors hover:text-ink">{language === 'en' ? 'Writing' : 'Tulisan'}</Link>
           <span className="text-[0.65rem]">›</span>
-          <span>{article.tag}</span>
+          <span>{displayTag}</span>
         </div>
 
         {/* Header */}
         <header  className = "mb-12" >
           <div className="mb-5 flex flex-wrap items-center gap-2.5">
             <span className={`rounded-full px-2.5 py-[3px] text-[0.7rem] font-medium uppercase tracking-[0.05em] ${tagColorClass(article.tagColor)}`}>
-              {article.tag}
+              {displayTag}
             </span>
             <span className="text-[0.5rem] text-ink-muted">●</span>
-            <span className="text-[0.8rem] text-ink-muted">{dateTimeLabel(article)}</span>
+            <span className="text-[0.8rem] text-ink-muted">{dateTimeLabel(article, language)}</span>
             <span className="text-[0.5rem] text-ink-muted">●</span>
-            <span className="text-[0.8rem] text-ink-muted">{article.readTime} baca</span>
+            <span className="text-[0.8rem] text-ink-muted">{Number.parseInt(String(article.readTime || '').match(/\d+/)?.[0] || '0', 10)} {language === 'en' ? 'min read' : 'menit baca'}</span>
             </div>
           <h1 className="mb-5 font-serif text-[clamp(2rem,5vw,3.2rem)] font-normal leading-[1.08] tracking-[-0.03em] text-ink">
-            {article.title}
+            {displayTitle}
           </h1>
-          {article.subtitle && (
-            <p className="text-[1.15rem] leading-[1.65] text-ink-secondary">{article.subtitle}</p>
+          {displaySubtitle && (
+            <p className="text-[1.15rem] leading-[1.65] text-ink-secondary">{displaySubtitle}</p>
+          )}
+          {wantsEnglish && !hasEnglishTitle && !hasEnglishBody && (
+            <p className="mt-4 rounded-lg border border-line bg-panel px-4 py-3 text-xs text-ink-muted">🇮🇩 English translation is not available yet. This article is shown in Indonesian.</p>
           )}
         <div className="my-9 flex items-center gap-3 text-ink-muted before:h-px before:flex-1 before:bg-line before:content-[''] after:h-px after:flex-1 after:bg-line after:content-['']">
           <span className="text-[0.7rem] tracking-[0.2em] text-accent">✦ ✦ ✦</span>
@@ -110,7 +124,7 @@ export default function Article() {
         )}
 
         {/* Body */}
-        <ArticleBody blocks={article.body} />
+        <ArticleBody blocks={Array.isArray(displayBody) ? displayBody : []} />
 
         {/* Footer */}
         <div className="mt-[72px] border-t border-line pt-10">
@@ -122,12 +136,12 @@ export default function Article() {
             <div>
               <h4 className="font-serif text-[1.05rem] font-normal text-ink">Tyo Pratama Priyanto Putra</h4>
               <p className="text-[0.82rem] leading-[1.5] text-ink-muted">
-                Menulis, teknologi, dan hal-hal di antaranya.
+                {language === 'en' ? 'Writing, technology, and everything in between.' : 'Menulis, teknologi, dan hal-hal di antaranya.'}
               </p>
             </div>
           </div>
 
-          <div className="mb-4 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">Artikel Lainnya</div>
+          <div className="mb-4 text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-ink-muted">{language === 'en' ? 'More Articles' : 'Artikel Lainnya'}</div>
           <div className="grid gap-2.5">
             {related.map((a) => (
               <Link
@@ -137,9 +151,9 @@ export default function Article() {
               >
                 <div className="flex flex-col gap-1">
                   <span className="text-[0.68rem] font-semibold uppercase tracking-[0.05em] text-accent">
-                    {a.tag}
+                    {language === 'en' && a.tagEn ? a.tagEn : a.tag}
                   </span>
-                  <span className="font-serif text-[1.02rem]">{a.title}</span>
+                  <span className="font-serif text-[1.02rem]">{language === 'en' && a.titleEn ? a.titleEn : a.title}</span>
                 </div>
                 <span className="ml-3 flex-shrink-0 text-ink-muted transition-transform group-hover:translate-x-1 group-hover:text-accent">→</span>
               </Link>

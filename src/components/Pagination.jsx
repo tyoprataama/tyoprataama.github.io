@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 export default function Pagination({
   currentPage,
@@ -7,6 +8,7 @@ export default function Pagination({
   itemsPerPage,
   onPageChange,
 }) {
+  const { language } = useLanguage()
   const [pageInput, setPageInput] = useState(
     String(currentPage),
   )
@@ -346,7 +348,7 @@ export default function Pagination({
           text-ink-muted
         "
       >
-        Showing {startItem}–{endItem} from {totalItems}
+        {language === 'en' ? `Showing ${startItem}–${endItem} of ${totalItems}` : `Menampilkan ${startItem}–${endItem} dari ${totalItems}`}
       </div>
     </div>
   )

@@ -35,8 +35,10 @@ export function collectImageUrls(article) {
   if (!article) return []
   const urls = []
   if (article.urlPicture) urls.push(article.urlPicture)
-  for (const b of article.body || []) {
-    if (b?.type === 'image' && b.url) urls.push(b.url)
+  for (const blocks of [article.body, article.bodyEn]) {
+    for (const b of Array.isArray(blocks) ? blocks : []) {
+      if (b?.type === 'image' && b.url) urls.push(b.url)
+    }
   }
   return urls
 }

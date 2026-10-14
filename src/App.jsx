@@ -6,6 +6,7 @@ import Article from './pages/Article.jsx'
 import Admin from './pages/Admin.jsx'
 import NotFound from './pages/NotFound.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import { LanguageProvider } from './context/LanguageContext.jsx'
 
 // import.meta.env.BASE_URL comes from `base` in vite.config.js (e.g. "/portfolio/").
 // React Router strips the trailing slash for its basename automatically.
@@ -15,9 +16,11 @@ export const router = createBrowserRouter(
   [
     {
       element: (
-        <AuthProvider>
-          <RootLayout />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <RootLayout />
+          </AuthProvider>
+        </LanguageProvider>
       ),
       children: [
         { index: true, element: <Home /> },

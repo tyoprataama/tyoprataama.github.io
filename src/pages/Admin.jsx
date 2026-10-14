@@ -27,6 +27,7 @@ const EMPTY = {
   title: '', slug: '', subtitle: '', date: '', time: '', readTime: '',
   tag: 'Career', tagColor: 'blue', isPinned: false, picture: false,
   urlPicture: '', body: [{ type: 'paragraph', text: '' }],
+  titleEn: '', slugEn: '', subtitleEn: '', tagEn: '', bodyEn: [],
 }
 
 // ── Login ───────────────────────────────────────────────
@@ -68,84 +69,137 @@ function LoginForm() {
 
 // ── Editor form ─────────────────────────────────────────
 function ArticleForm({ initial, onSave, onCancel }) {
-  const [form, setForm] = useState(initial)
+  const [form, setForm] = useState(() => ({
+    ...EMPTY,
+    ...initial,
+    body: Array.isArray(initial?.body) && initial.body.length
+      ? initial.body
+      : [{ type: 'paragraph', text: '' }],
+    bodyEn: Array.isArray(initial?.bodyEn) ? initial.bodyEn : [],
+  }))
   const [busy, setBusy] = useState(false)
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
+  const [language, setLanguage] = useState('id')
+  const set = (key, value) => setForm((current) => ({ ...current, [key]: value }))
+  const titleKey = language === 'id' ? 'title' : 'titleEn'
+  const slugKey = language === 'id' ? 'slug' : 'slugEn'
+  const subtitleKey = language === 'id' ? 'subtitle' : 'subtitleEn'
+  const tagKey = language === 'id' ? 'tag' : 'tagEn'
+  const bodyKey = language === 'id' ? 'body' : 'bodyEn'
+  const blocks = Array.isArray(form[bodyKey]) ? form[bodyKey] : []
 
-  const setBlock = (i, patch) =>
-    setForm((f) => ({ ...f, body: f.body.map((b, j) => (j === i ? { ...b, ...patch } : b)) }))
-  const addBlock = () => setForm((f) => ({ ...f, body: [...f.body, { type: 'paragraph', text: '' }] }))
-  const removeBlock = (i) => setForm((f) => ({ ...f, body: f.body.filter((_, j) => j !== i) }))
+  const setBlock = (index, patch) => setForm((current) => ({
+    ...current,
+    [bodyKey]: (Array.isArray(current[bodyKey]) ? current[bodyKey] : []).map((block, i) =>
+      i === index ? { ...block, ...patch } : block
+    ),
+  }))
+  const addBlock = () => setForm((current) => ({
+    ...current,
+    [bodyKey]: [...(Array.isArray(current[bodyKey]) ? current[bodyKey] : []), { type: 'paragraph', text: '' }],
+  }))
+  const removeBlock = (index) => setForm((current) => ({
+    ...current,
+    [bodyKey]: (Array.isArray(current[bodyKey]) ? current[bodyKey] : []).filter((_, i) => i !== index),
+  }))
+  const copyIndonesianStructure = () => {
+    setForm((current) => ({
+      ...current,
+      bodyEn: (Array.isArray(current.body) ? current.body : []).map((block) =>
+        block.type === 'image'
+          ? { type: 'image', url: block.url || '', caption: '' }
+          : { type: block.type || 'paragraph', text: '' }
+      ),
+    }))
+  }
 
   const save = async () => {
     setBusy(true)
-    try { await onSave(form) } catch (e) { alert('Gagal menyimpan: ' + e.message) }
-    setBusy(false)
+    try {
+      await onSave({ ...form, body: Array.isArray(form.body) ? form.body : [], bodyEn: Array.isArray(form.bodyEn) ? form.bodyEn : [] })
+    } catch (error) {
+      alert('Gagal menyimpan: ' + (error?.message || error))
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const field = "rounded-sm2 border border-line bg-surface text-ink placeholder:text-ink-muted px-3 py-2 text-[0.88rem] outline-none focus:border-accent"
+  const field = 'rounded-sm2 border border-line bg-surface text-ink placeholder:text-ink-muted px-3 py-2 text-[0.88rem] outline-none focus:border-accent'
+  const tabClass = (active) => `flex-1 rounded-full px-4 py-2 text-sm transition ${active ? 'bg-ink text-paper' : 'text-ink-secondary hover:bg-panel'}`
 
   return (
     <div className="glass rounded-card p-6 shadow-card">
       <h2 className="mb-4 font-serif text-[1.3rem] text-ink">{form.id ? 'Edit Artikel' : 'Artikel Baru'}</h2>
-      <div className="grid grid-cols-2 gap-3">
-        <input className={field} placeholder="Judul" value={form.title} onChange={(e) => set('title', e.target.value)} />
-        <input className={field} placeholder="Slug (mis. siapakah-saya)" value={form.slug} onChange={(e) => set('slug', e.target.value)} />
-        <input className={field} placeholder="Tanggal (18 April 2026)" value={form.date} onChange={(e) => set('date', e.target.value)} />
+      <div className="mb-5 flex gap-2 rounded-full border border-line p-1">
+        <button type="button" onClick={() => setLanguage('id')} className={tabClass(language === 'id')}>🇮🇩 Indonesia</button>
+        <button type="button" onClick={() => setLanguage('en')} className={tabClass(language === 'en')}>🇺🇸 English</button>
+      </div>
+      {language === 'en' && (
+        <div className="mb-4 rounded-sm2 border border-line bg-panel p-3 text-sm text-ink-secondary">
+          Isi terjemahan Inggris di tab ini. Data Indonesia dan metadata bersama tidak berubah saat berpindah tab.
+          {blocks.length === 0 && <div className="mt-2 flex flex-wrap items-center gap-2"><span>Konten Inggris masih kosong.</span><button type="button" onClick={copyIndonesianStructure} className="rounded-full border border-line px-3 py-1 text-xs text-ink hover:border-accent">Salin struktur blok Indonesia</button></div>}
+        </div>
+      )}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <input className={field} placeholder={language === 'id' ? 'Judul' : 'English title'} value={form[titleKey] || ''} onChange={(e) => set(titleKey, e.target.value)} />
+        {language === 'id' && <input className={field} placeholder="Slug (mis. siapakah-saya)" value={form.slug || ''} onChange={(e) => set('slug', e.target.value)} />}
+        {language === 'id' && <input className={field} placeholder="Tanggal (18 April 2026)" value={form.date || ''} onChange={(e) => set('date', e.target.value)} />}
         <input className={field} placeholder="Waktu upload (mis. 19:00 WIB)" value={form.time || ''} onChange={(e) => set('time', e.target.value)} />
-        <input className={field} type="number" min="1" placeholder="Lama baca (menit)" value={parseReadMinutes(form.readTime)} onChange={(e) => set('readTime', formatReadTime(e.target.value))}/>
-      <select
-      className={field}
-      value={form.tag}
-      onChange={(e) => setForm((f) => ({ ...f, tag: e.target.value, tagColor: colorForTag(e.target.value) }))}>
-        {TAGS.map((t) => (
-        <option key={t} value={t}>{t}</option>
-      ))}
-</select>
-        <label className="flex items-center gap-2 text-[0.85rem] text-ink">
-          <input type="checkbox" checked={form.isPinned} onChange={(e) => set('isPinned', e.target.checked)} /> Pinned
-        </label>
-      </div>
-      <textarea className={field + ' mt-3 w-full'} rows={2} placeholder="Subtitle" value={form.subtitle} onChange={(e) => set('subtitle', e.target.value)} />
-      <div className="mt-3">
-        <ImageInput
-          label="Gambar hero (opsional)"
-          value={form.urlPicture || ''}
-          onChange={(v) => setForm((f) => ({ ...f, urlPicture: v, picture: !!v }))}
-        />
-      </div>
+        <input className={field} type="number" min="1" placeholder="Lama baca (menit)" value={parseReadMinutes(form.readTime)} onChange={(e) => set('readTime', formatReadTime(e.target.value))} />
+        
+        <select
+          className={field}
+          value={form.tag || 'Career'}
+          onChange={(e) =>
+            setForm((current) => ({
+              ...current,
+              tag: e.target.value,
+              tagColor: colorForTag(e.target.value),
+            }))
+          }
+        >
+          {TAGS.map((tag) => (
+            <option key={tag} value={tag}>
+              {tag}
+            </option>
+          ))}
+        </select>
 
-      {/* Editor blok konten */}
-      <div className="mt-5 text-[0.72rem] font-medium uppercase tracking-wider text-ink-muted">Isi Artikel (blok)</div>
+        <label className="flex items-center gap-2 text-[0.85rem] text-ink"><input type="checkbox" checked={!!form.isPinned} onChange={(e) => set('isPinned', e.target.checked)} /> Pinned</label>
+      </div>
+      <textarea className={field + ' mt-3 w-full'} rows={2} placeholder={language === 'id' ? 'Subtitle' : 'English subtitle'} value={form[subtitleKey] || ''} onChange={(e) => set(subtitleKey, e.target.value)} />
+      <div className="mt-3">
+        <ImageInput label="Gambar hero (berlaku untuk kedua bahasa)" value={form.urlPicture || ''} onChange={(value) => setForm((current) => ({ ...current, urlPicture: value, picture: !!value }))} />
+      </div>
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
+        <div className="text-[0.72rem] font-medium uppercase tracking-wider text-ink-muted">{language === 'id' ? 'Isi Artikel (blok)' : 'Article Content (blocks)'}</div>
+        {language === 'en' && blocks.length > 0 && <button type="button" onClick={copyIndonesianStructure} className="text-xs text-accent hover:underline">Salin ulang struktur blok Indonesia</button>}
+      </div>
       <div className="mt-2 flex flex-col gap-3">
-        {form.body.map((b, i) => (
-          <div key={i} className="rounded-sm2 border border-line bg-panel p-3">
+        {blocks.length === 0 ? (
+          <p className="rounded-sm2 border border-dashed border-line p-4 text-sm text-ink-muted">Belum ada blok konten. Tekan “+ Tambah blok” untuk mulai menulis.</p>
+        ) : blocks.map((block, index) => (
+          <div key={`${bodyKey}-${index}`} className="rounded-sm2 border border-line bg-panel p-3">
             <div className="mb-2 flex items-center gap-2">
-              <select className={field} value={b.type} onChange={(e) => setBlock(i, { type: e.target.value })}>
-                <option value="paragraph">paragraph</option><option value="heading">heading</option>
-                <option value="blockquote">blockquote</option><option value="pullquote">pullquote</option>
-                <option value="image">image</option>
+              <select className={field} value={block.type || 'paragraph'} onChange={(e) => setBlock(index, { type: e.target.value })}>
+                <option value="paragraph">paragraph</option><option value="heading">heading</option><option value="blockquote">blockquote</option><option value="pullquote">pullquote</option><option value="image">image</option>
               </select>
-              <button onClick={() => removeBlock(i)} className="ml-auto text-[0.8rem] text-[#e5484d]">Hapus blok</button>
+              <button type="button" onClick={() => removeBlock(index)} className="ml-auto text-[0.8rem] text-[#e5484d]">Hapus blok</button>
             </div>
-            {b.type === 'image' ? (
+            {block.type === 'image' ? (
               <div className="grid gap-2">
-                <ImageInput label="Gambar blok" value={b.url || ''} onChange={(url) => setBlock(i, { url })} />
-                <input className={field} placeholder="Caption" value={b.caption || ''} onChange={(e) => setBlock(i, { caption: e.target.value })} />
+                <ImageInput label="Gambar blok" value={block.url || ''} onChange={(url) => setBlock(index, { url })} />
+                <input className={field} placeholder={language === 'id' ? 'Caption' : 'English caption'} value={block.caption || ''} onChange={(e) => setBlock(index, { caption: e.target.value })} />
               </div>
             ) : (
-              <textarea className={field + ' w-full'} rows={3} placeholder="Teks…" value={b.text || ''} onChange={(e) => setBlock(i, { text: e.target.value })} />
+              <textarea className={field + ' w-full'} rows={3} placeholder={language === 'id' ? 'Teks…' : 'English text…'} value={typeof block.text === 'string' ? block.text : ''} onChange={(e) => setBlock(index, { text: e.target.value })} />
             )}
           </div>
         ))}
-        <button onClick={addBlock} className="self-start rounded-[30px] border border-line px-4 py-2 text-[0.82rem]">+ Tambah blok</button>
+        <button type="button" onClick={addBlock} className="self-start rounded-[30px] border border-line px-4 py-2 text-[0.82rem]">+ Tambah blok</button>
       </div>
-
       <div className="mt-5 flex gap-3">
-        <button onClick={save} disabled={busy} className="rounded-[30px] bg-ink px-6 py-2.5 text-[0.85rem] font-medium text-paper disabled:opacity-60">
-          {busy ? 'Menyimpan…' : 'Simpan'}
-        </button>
-        <button onClick={onCancel} className="rounded-[30px] border border-line px-6 py-2.5 text-[0.85rem]">Batal</button>
+        <button type="button" onClick={save} disabled={busy} className="rounded-[30px] bg-ink px-6 py-2.5 text-[0.85rem] font-medium text-paper disabled:opacity-60">{busy ? 'Menyimpan…' : 'Simpan'}</button>
+        <button type="button" onClick={onCancel} className="rounded-[30px] border border-line px-6 py-2.5 text-[0.85rem]">Batal</button>
       </div>
     </div>
   )

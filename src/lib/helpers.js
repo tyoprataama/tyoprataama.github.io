@@ -50,9 +50,31 @@ export function formatReadTime(minutes) {
 }
 
 // ── Tanggal + waktu upload (mis. "18 April 2026 · 19:00 WIB") ──
-export function dateTimeLabel(a) {
+const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+export function localizedArticleDate(value, language = 'id') {
+  if (!value) return ''
+  const raw = String(value).trim()
+  // Parse ISO date safely, avoiding UTC timezone shifts.
+  const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  let day, month, year
+  if (iso) { year = Number(iso[1]); month = Number(iso[2]); day = Number(iso[3]) }
+  else {
+    const m = raw.match(/^(\d{1,2})\s+([\p{L}]+)\s+(\d{4})$/u)
+    if (!m) return raw
+    day = Number(m[1]); year = Number(m[3])
+    const idx = MONTHS_ID.findIndex(x => x.toLowerCase() === m[2].toLowerCase())
+    const eng = ['January','February','March','April','May','June','July','August','September','October','November','December']
+    const idxEn = eng.findIndex(x => x.toLowerCase() === m[2].toLowerCase())
+    month = idx >= 0 ? idx + 1 : idxEn >= 0 ? idxEn + 1 : 0
+    if (!month) return raw
+  }
+  const months = language === 'en' ? ['January','February','March','April','May','June','July','August','September','October','November','December'] : MONTHS_ID
+  return `${day} ${months[month - 1]} ${year}`
+}
+export function dateTimeLabel(a, language = 'id') {
   if (!a) return ''
-  return a.time ? `${a.date} · ${a.time}` : a.date
+  const date = localizedArticleDate(a.date, language)
+  return a.time ? `${date} · ${a.time}` : date
 }
 
 // ── Tanggal pendek utk footer (mis. "25 Jun 2026", zona Asia/Jakarta) ──

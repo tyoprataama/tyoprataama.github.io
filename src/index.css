@@ -119,7 +119,8 @@ body::before {
 
 .mast-inner {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  /* Dropdown bahasa tidak boleh terpotong oleh navbar */
   isolation: isolate;
   display: flex;
   align-items: center;
@@ -191,6 +192,8 @@ body::before {
 }
 
 .mast .navwrap {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -913,4 +916,97 @@ body::before {
   select {
     font-size: 16px !important;
   }
+}
+
+/* ---------------- Language switcher ---------------- */
+.language-menu-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 6px;
+}
+
+.language-toggle {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 1.15rem;
+  transition: border-color 0.2s, transform 0.2s, background 0.2s;
+}
+
+.language-toggle:hover,
+.language-toggle[aria-expanded="true"] {
+  border-color: var(--line-2);
+  background: var(--accent-soft);
+}
+
+.language-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 9999;
+  width: 260px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 12px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.language-option:hover,
+.language-option.active {
+  background: var(--accent-soft);
+}
+
+.language-option-flag {
+  display: inline-flex;
+  flex: 0 0 42px;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.65rem;
+}
+
+.language-option-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.language-option-copy strong {
+  font-size: 0.96rem;
+  font-weight: 650;
+}
+
+.language-option-copy small {
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+
+.language-check {
+  margin-left: auto;
+  color: var(--accent);
 }

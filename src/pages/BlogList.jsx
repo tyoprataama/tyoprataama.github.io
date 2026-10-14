@@ -6,12 +6,17 @@ import {
   getExcerpt,
   sortPinnedThenDate,
   dateTimeLabel,
+  parseReadMinutes,
 } from '../lib/helpers.js'
+
 import Pagination from '../components/Pagination.jsx'
+import { useLanguage } from '../context/LanguageContext.jsx'
 
 const ITEMS_PER_PAGE = 5
 
 export default function BlogList() {
+  const { language } = useLanguage()
+  const isEnglish = language === 'en'
   const [articles, setArticles] = useState([])
   const [filter, setFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -22,8 +27,8 @@ export default function BlogList() {
 
   // Ambil semua kategori yang memang tersedia di database.
   const tags = useMemo(
-    () => [...new Set(articles.map((a) => a.tag).filter(Boolean))],
-    [articles],
+    () => [...new Set(articles.map((a) => (isEnglish && a.tagEn ? a.tagEn : a.tag)).filter(Boolean))],
+    [articles, isEnglish],
   )
 
   // Filter berdasarkan tema.
@@ -31,10 +36,10 @@ export default function BlogList() {
     const result =
       filter === 'all'
         ? articles
-        : articles.filter((a) => a.tag === filter)
+        : articles.filter((a) => (isEnglish && a.tagEn ? a.tagEn : a.tag) === filter)
 
     return sortPinnedThenDate(result)
-  }, [articles, filter])
+  }, [articles, filter, isEnglish])
 
   // Jumlah halaman berdasarkan hasil filter.
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
@@ -67,15 +72,15 @@ export default function BlogList() {
     <main className="mx-auto max-w-[780px] px-6 pb-28 pt-36">
       <div className="mb-12">
         <div className="text-[0.72rem] font-medium uppercase tracking-[0.22em] text-ink-muted">
-          — The journal
+          {isEnglish ? '— The journal' : '— Catatan'}
         </div>
 
         <h1 className="mt-5 font-serif text-[clamp(2.4rem,6vw,3.6rem)] font-normal tracking-[-0.03em] text-ink">
-          Writing
+          {isEnglish ? 'Writing' : 'Tulisan'}
         </h1>
 
         <p className="mt-3 max-w-[440px] text-ink-secondary">
-          Pikiran tentang karir, kehidupan, dan hal-hal di antaranya.
+          {isEnglish ? 'Thoughts on career, life, and everything in between.' : 'Pikiran tentang karier, kehidupan, dan hal-hal di antaranya.'}
         </p>
       </div>
 
@@ -92,7 +97,7 @@ export default function BlogList() {
                 : 'border-line text-ink-secondary hover:border-line2 hover:text-ink'
             }`}
           >
-            {t === 'all' ? 'Semua' : t}
+            {t === 'all' ? (isEnglish ? 'All' : 'Semua') : t}
           </button>
         ))}
       </div>
@@ -100,7 +105,7 @@ export default function BlogList() {
       {/* Info jumlah artikel */}
       {filtered.length > 0 && (
         <div className="mb-2 text-[0.75rem] text-ink-muted">
-          Menampilkan{' '}
+          {isEnglish ? 'Showing ' : 'Menampilkan '}
           {Math.min(
             (currentPage - 1) * ITEMS_PER_PAGE + 1,
             filtered.length,
@@ -117,7 +122,7 @@ export default function BlogList() {
       {/* List */}
       {filtered.length === 0 ? (
         <div className="py-16 text-center text-ink-muted">
-          Belum ada artikel di kategori ini.
+          {isEnglish ? 'No articles in this category yet.' : 'Belum ada artikel di kategori ini.'}
         </div>
       ) : (
         <>
@@ -130,6 +135,9 @@ export default function BlogList() {
               >
                 <div>
                   <div className="mb-2.5 flex flex-wrap items-center gap-2.5">
+                    {isEnglish && (!a.titleEn || !Array.isArray(a.bodyEn) || !a.bodyEn.length) && (
+                      <span className="rounded-full border border-line px-2 py-[3px] text-[0.62rem] font-medium text-ink-muted">🇮🇩 ID</span>
+                    )}
                     {a.isPinned && (
                       <span className="rounded-full bg-accent-soft px-2 py-[3px] text-[0.65rem] font-medium uppercase tracking-[0.08em] text-accent">
                         Pinned
@@ -141,20 +149,29 @@ export default function BlogList() {
                         a.tagColor,
                       )}`}
                     >
-                      {a.tag}
+                      {isEnglish && a.tagEn ? a.tagEn : a.tag}
                     </span>
 
+                    
                     <span className="text-[0.74rem] text-ink-muted">
-                      {dateTimeLabel(a)}
+                      {dateTimeLabel(a, language)}
                     </span>
+
+                    {parseReadMinutes(a.readTime) > 0 && (
+                      <span className="rounded-full border border-line px-2.5 py-[3px] text-[0.7rem] text-ink-secondary">
+                        {parseReadMinutes(a.readTime)}{' '}
+                        {isEnglish ? 'min read' : 'menit baca'}
+                      </span>
+                    )}
+
                   </div>
 
                   <h2 className="mb-1.5 font-serif text-[1.55rem] font-normal leading-tight tracking-[-0.01em] text-ink transition-colors group-hover:text-accent">
-                    {a.title}
+                    {isEnglish && a.titleEn ? a.titleEn : a.title}
                   </h2>
 
                   <p className="max-w-[560px] text-[0.9rem] leading-[1.6] text-ink-secondary">
-                    {getExcerpt(a.body)}
+                    {getExcerpt(isEnglish && Array.isArray(a.bodyEn) && a.bodyEn.length ? a.bodyEn : a.body)}
                   </p>
                 </div>
 
