@@ -276,6 +276,27 @@ body::before {
   align-items: end;
 }
 
+.hero-identity {
+  margin-bottom: 30px;
+}
+
+.hero-identity-name {
+  margin: 0 0 8px;
+  font-family: var(--sans, Inter, sans-serif);
+  font-size: clamp(1.8rem, 3.3vw, 2.35rem);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+
+.hero-identity-focus {
+  margin: 0;
+  font-size: clamp(1rem, 2.2vw, 1.45rem);
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
 .hero .lead-eyebrow {
   display: flex;
   align-items: center;

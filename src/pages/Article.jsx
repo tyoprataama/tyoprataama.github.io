@@ -49,10 +49,25 @@ export default function Article() {
   }, [slug])
 
   useEffect(() => {
-    if (article) document.title = `${(language === 'en' && article.titleEn) ? article.titleEn : article.title} · Tyo`
-    return () => {
-      document.title = 'Tyo · Portfolio'
+    if (!article) return
+    const title = `${(language === 'en' && article.titleEn) ? article.titleEn : article.title} · Tyo Pratama Priyanto Putra`
+    document.title = title
+    const descriptionSource = (language === 'en' && article.subtitleEn) ? article.subtitleEn : article.subtitle
+    const description = String(descriptionSource || article.title || 'Artikel oleh Tyo Pratama Priyanto Putra').replace(/<[^>]*>/g, '').slice(0, 160)
+    let meta = document.head.querySelector('meta[name="description"]')
+    if (!meta) {
+      meta = document.createElement('meta')
+      meta.name = 'description'
+      document.head.appendChild(meta)
     }
+    meta.content = description
+    let canonical = document.head.querySelector('link[rel="canonical"]')
+    if (!canonical) {
+      canonical = document.createElement('link')
+      canonical.rel = 'canonical'
+      document.head.appendChild(canonical)
+    }
+    canonical.href = `https://tyoprataama.github.io${window.location.pathname}`
   }, [article, language])
 
   if (article === undefined) {
