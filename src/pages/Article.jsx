@@ -141,7 +141,7 @@ export default function Article() {
             {displayTitle}
           </h1>
           {displaySubtitle && (
-            <p className="text-[1.15rem] text-justify leading-[1.65] text-ink-secondary">{displaySubtitle}</p>
+            <p className="text-[1.15rem] leading-[1.65] text-ink-secondary">{displaySubtitle}</p>
           )}
           {wantsEnglish && !hasEnglishTitle && !hasEnglishBody && (
             <p className="mt-4 rounded-lg border border-line bg-panel px-4 py-3 text-xs text-ink-muted">🇮🇩 English translation is not available yet. This article is shown in Indonesian.</p>

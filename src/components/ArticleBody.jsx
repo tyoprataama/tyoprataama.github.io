@@ -5,7 +5,7 @@ import { resolveImageSrc } from '../lib/helpers.js'
 export default function ArticleBody({ blocks }) {
   const safeBlocks = Array.isArray(blocks) ? blocks : []
   return (
-    <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-serif prose-headings:font-normal prose-headings:tracking-[-0.01em] prose-headings:text-ink prose-p:text-ink-secondary prose-p:text-justify prose-strong:text-ink prose-a:text-accent prose-blockquote:border-accent prose-blockquote:not-italic prose-blockquote:text-ink prose-blockquote:text-justify prose-img:rounded-lg">
+    <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-serif prose-headings:font-normal prose-headings:tracking-[-0.01em] prose-headings:text-ink prose-p:text-ink-secondary prose-strong:text-ink prose-a:text-accent prose-blockquote:border-accent prose-blockquote:not-italic prose-blockquote:text-ink prose-blockquote:text-justify prose-img:rounded-lg">
       {safeBlocks.map((block, i) => {
         const text = typeof block?.text === 'string' ? block.text : ''
         switch (block.type) {
