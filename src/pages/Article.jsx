@@ -79,6 +79,28 @@ export default function Article() {
   if (!article) {
     return (
       <main className="mx-auto max-w-[680px] px-6 py-40 text-center">
+         <div className="relative mx-auto mb-5 w-full max-w-[420px]">
+        {/* Blob putih di belakang ilustrasi */}
+        <div
+          aria-hidden="true"
+          className = "absolute left-[14%] top-[12%] h-[72%] w-[78%] bg-[#f6f4ef]"
+          style={{
+            borderRadius:
+              '63% 37% 48% 52% / 42% 48% 52% 58%',
+            transform: 'rotate(-12deg)',
+          }}
+        />
+
+        {/* SVG bersilangan dengan blob */}
+        <div
+          className="relative z-10 aspect-[4/3] w-full bg-center bg-contain bg-no-repeat"
+          style={{
+            backgroundImage: "url('/assets/404error.svg')",
+          }}
+          role="img"
+          aria-label="404 error illustration"
+        />
+      </div>
         <h2 className="font-serif text-[2rem] font-normal text-ink">{language === 'en' ? 'Article not found.' : 'Artikel tidak ditemukan.'}</h2>
         <p className="mt-3 text-ink-secondary">{language === 'en' ? 'The article may have been moved or does not exist.' : 'Artikel yang Anda cari tidak ada atau sudah dipindahkan.'}</p>
         <Link to="/blog" className="mt-6 inline-block font-medium text-accent">← {language === 'en' ? 'Back to all writing' : 'Kembali ke semua tulisan'}</Link>
