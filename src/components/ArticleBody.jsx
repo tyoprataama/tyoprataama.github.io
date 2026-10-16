@@ -5,7 +5,7 @@ import { resolveImageSrc } from '../lib/helpers.js'
 export default function ArticleBody({ blocks }) {
   const safeBlocks = Array.isArray(blocks) ? blocks : []
   return (
-    <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-serif prose-headings:font-normal prose-headings:tracking-[-0.01em] prose-headings:text-ink prose-headings:text-justify prose-p:text-ink-secondary prose-p:text-justify prose-strong:text-ink prose-a:text-accent prose-blockquote:border-accent prose-blockquote:not-italic prose-blockquote:text-ink prose-blockquote:text-justify prose-img:rounded-lg">
+    <div className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-serif prose-headings:font-normal prose-headings:tracking-[-0.01em] prose-headings:text-ink prose-p:text-ink-secondary prose-p:text-justify prose-strong:text-ink prose-a:text-accent prose-blockquote:border-accent prose-blockquote:not-italic prose-blockquote:text-ink prose-blockquote:text-justify prose-img:rounded-lg">
       {safeBlocks.map((block, i) => {
         const text = typeof block?.text === 'string' ? block.text : ''
         switch (block.type) {
@@ -21,7 +21,7 @@ export default function ArticleBody({ blocks }) {
                   &ldquo;
                 </span>
 
-                <p className="m-0 text-justify font-serif text-[1.25rem] italic leading-[1.6] text-ink">
+                <p className="m-0 font-serif text-[1.25rem] italic leading-[1.6] text-ink">
                   {text}
                 </p>
               </blockquote>
@@ -33,7 +33,7 @@ export default function ArticleBody({ blocks }) {
                 key={i}
                 className="not-prose my-12 border-y border-line py-9"
               >
-                <p className="mx-auto max-w-[560px] text-justify font-serif text-[1.7rem] font-normal leading-[1.35] tracking-[-0.01em] text-ink">
+                <p className="mx-auto max-w-[560px] font-serif text-[1.7rem] font-normal leading-[1.35] tracking-[-0.01em] text-ink">
                   {text}
                 </p>
 
