@@ -43,7 +43,7 @@ export default function RootLayout() {
       },
       {
         match: path =>
-          path === '/admin' || path.endsWith('/admin'),
+          path === '/admin' || path === '/admin/' || path.endsWith('/admin'),
         title: titles.admin,
         page: 'admin',
       },

@@ -18,6 +18,17 @@ export async function uploadImage(file) {
   return data.publicUrl
 }
 
+// Upload dokumen (PDF atau gambar) ke bucket publik yang sama dengan media portfolio.
+export async function uploadDocument(file) {
+  const ext = (file.name.split('.').pop() || 'pdf').toLowerCase()
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').slice(-100)
+  const path = `documents/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName || `document.${ext}`}`
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type })
+  if (error) throw error
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
+  return data.publicUrl
+}
+
 // Apakah URL ini benar-benar file di bucket kita? (bukan link gdrive/base64)
 export function isBucketUrl(url) {
   return typeof url === 'string' && url.includes(PUBLIC_MARKER)

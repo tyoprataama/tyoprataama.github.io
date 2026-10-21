@@ -7,6 +7,7 @@ import { projects as staticProjects, experiences as staticExperiences } from '..
 import { sortPinnedThenDate, getExcerpt } from '../lib/helpers.js'
 import Pagination from '../components/Pagination.jsx'
 import StaticPagination from '../components/StaticPagination.jsx'
+import DocumentModal from '../components/DocumentModal.jsx'
 import { resolveImageSrc } from '../lib/helpers.js'
 import { useLanguage } from '../context/LanguageContext.jsx'
 
@@ -38,6 +39,7 @@ export default function Home() {
   const [experiences, setExperiences] = useState(staticExperiences)
   const [projectPage, setProjectPage] = useState(1)
   const [experiencePage, setExperiencePage] = useState(1)
+  const [activeDocumentItem, setActiveDocumentItem] = useState(null)
   const savedScrollY = useRef(null)
   const previousPages = useRef({ projectPage, experiencePage })
   const ITEMS_PER_PAGE = 3
@@ -78,15 +80,15 @@ const changeExperiencePage = page => {
   useEffect(() => {
     fetchArticles().then(setArticles).catch(console.error)
     fetchHomeContent().then(setContent).catch(console.error)
-    fetchProjects().then(rows => {
+    fetchProjects({ includeHidden: false }).then(rows => {
       if (rows.length) { setProjects(rows.filter(p => p.isVisible).map(p => ({
-        id: p.id, title: p.title, titleId: p.titleId, desc: p.description, descId: p.descriptionId, categoryId: p.categoryId, tech: p.stack || [], links: p.projectUrl,
+        id: p.id, title: p.title, titleId: p.titleId, desc: p.description, descId: p.descriptionId, categoryId: p.categoryId, tech: p.stack || [], links: p.projectUrl, documents: Array.isArray(p.documents) ? p.documents.filter(doc => typeof doc === 'string' ? !!doc : !!(doc?.url || doc?.publicUrl || doc?.fileUrl || doc?.href)).map(doc => typeof doc === 'string' ? { title: '', url: doc, source: 'link' } : { ...doc, url: doc.url || doc.publicUrl || doc.fileUrl || doc.href }) : [], documentTitle: p.documentTitle || '', documentTitleId: p.documentTitleId || p.documentTitle || '', documentTitleEn: p.documentTitleEn || '',
         category: p.category, imageUrl: p.imageUrl, isPinned: p.isPinned, sortOrder: p.sortOrder,
       }))); setProjectPage(1) }
     }).catch(console.error)
-    fetchExperiences().then(rows => {
+    fetchExperiences({ includeHidden: false }).then(rows => {
       if (rows.length) { setExperiences(rows.filter(e => e.isVisible).map(e => ({
-        id: e.id, title: e.role, titleId: e.roleId, company: e.company, companyId: e.companyId, period: e.period, periodId: e.periodId, desc: e.description, descId: e.descriptionId, isPinned: e.isPinned, sortOrder: e.sortOrder,
+        id: e.id, title: e.role, titleId: e.roleId, company: e.company, companyId: e.companyId, period: e.period, periodId: e.periodId, desc: e.description, descId: e.descriptionId, documents: Array.isArray(e.documents) ? e.documents.filter(doc => typeof doc === 'string' ? !!doc : !!(doc?.url || doc?.publicUrl || doc?.fileUrl || doc?.href)).map(doc => typeof doc === 'string' ? { title: '', url: doc, source: 'link' } : { ...doc, url: doc.url || doc.publicUrl || doc.fileUrl || doc.href }) : [], documentTitle: e.documentTitle || '', documentTitleId: e.documentTitleId || e.documentTitle || '', documentTitleEn: e.documentTitleEn || '', isPinned: e.isPinned, sortOrder: e.sortOrder,
       }))); setExperiencePage(1) }
     }).catch(console.error)
   }, [])
@@ -125,7 +127,7 @@ const changeExperiencePage = page => {
       <div>{visibleProjects.map((p, i) => <div className="work-item sr" key={p.id || p.title || i}>
         <div className="wmain"><h3>{!isEn && p.titleId ? p.titleId : p.title}</h3>{(!isEn && p.categoryId ? p.categoryId : p.category) && <p className="text-xs uppercase tracking-wide text-ink-muted">{!isEn && p.categoryId ? p.categoryId : p.category}</p>}<p>{!isEn && p.descId ? p.descId : p.desc}</p>
           <div className="stack">{(p.tech || []).map((t) => <span key={t}>{t}</span>)}</div>
-          {p.links && <a className="btn btn-line wbtn" href={p.links} target="_blank" rel="noreferrer">{isEn ? 'View project' : 'Lihat proyek'} <span className="arw">↗</span></a>}
+          <div className="work-actions">{p.links && <a className="btn btn-line wbtn" href={p.links} target="_blank" rel="noreferrer">{isEn ? 'View project' : 'Lihat proyek'} <span className="arw">↗</span></a>}{Array.isArray(p.documents) && p.documents.some(doc => doc?.url) && <button type="button" className="btn btn-line wbtn" onClick={() => setActiveDocumentItem({ item: p, kind: 'document' })}>{isEn ? 'View documents' : 'Lihat dokumen'} <span className="arw">↗</span></button>}</div>
         </div><div className="wnum">{String((projectPage - 1) * ITEMS_PER_PAGE + i + 1).padStart(2, '0')}</div>
       </div>)}</div>
       <StaticPagination currentPage={projectPage} totalPages={projectPages} onPageChange={changeProjectPage} />
@@ -140,7 +142,7 @@ const changeExperiencePage = page => {
 
     <section className="section" id="experience"><div className="wrap">
       <div className="shead sr"><h2>{isEn ? 'Experience' : 'Pengalaman'}</h2><span className="no">03 / {isEn ? 'Journey' : 'Perjalanan'}</span></div>
-      <div>{visibleExperiences.map((ex, i) => <div className="exp sr" key={ex.id || `${ex.title}-${i}`}><div className="when">{!isEn && ex.periodId ? ex.periodId : ex.period}</div><div><div className="role">{!isEn && ex.titleId ? ex.titleId : ex.title}</div><div className="org">{!isEn && ex.companyId ? ex.companyId : ex.company}</div><div className="desc">{!isEn && ex.descId ? ex.descId : ex.desc}</div></div></div>)}</div>
+      <div>{visibleExperiences.map((ex, i) => <div className="exp sr" key={ex.id || `${ex.title}-${i}`}><div className="when">{!isEn && ex.periodId ? ex.periodId : ex.period}</div><div><div className="role">{!isEn && ex.titleId ? ex.titleId : ex.title}</div><div className="org">{!isEn && ex.companyId ? ex.companyId : ex.company}</div><div className="desc">{!isEn && ex.descId ? ex.descId : ex.desc}</div>{Array.isArray(ex.documents) && ex.documents.some(doc => doc?.url) && <div className="experience-actions"><button type="button" className="btn btn-line wbtn" onClick={() => setActiveDocumentItem({ item: ex, kind: 'certificate' })}>{isEn ? 'View certificate' : 'Lihat sertifikat'} <span className="arw">↗</span></button></div>}</div></div>)}</div>
       <StaticPagination currentPage={experiencePage} totalPages={experiencePages} onPageChange={changeExperiencePage} />
     </div></section>
 
@@ -155,5 +157,6 @@ const changeExperiencePage = page => {
       <span className="eyebrow sr">{localized(contact, 'eyebrow')}</span><h2 className="sr">{localized(contact, 'titleLead')} <em>{localized(contact, 'titleEmphasis')}</em></h2><br />
       <a href={`mailto:${contact.email}`} className="mail sr">{contact.email}</a>
     </div></section>
+    {activeDocumentItem && <DocumentModal item={activeDocumentItem.item} kind={activeDocumentItem.kind} language={language} onClose={() => setActiveDocumentItem(null)} />}
   </>
 }
