@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 function googleDrivePreview(url) {
   if (!/drive\.google\.com|docs\.google\.com/i.test(url || '')) return null
@@ -9,7 +9,125 @@ function googleDrivePreview(url) {
 
 function isImage(url, title = '') {
   const imageExtension = /\.(png|jpe?g|webp|gif)(?:[?#].*)?$/i
-  return imageExtension.test(url || '') || imageExtension.test(title || '')
+
+  return (
+    imageExtension.test(url || '') ||
+    imageExtension.test(title || '')
+  )
+}
+
+
+function DocumentLoader({ language }) {
+  return (
+    <div
+      className="document-preview-loading"
+      role="status"
+      aria-live="polite"
+    >
+      <span className="document-loading-spinner" aria-hidden="true" />
+
+      <p>
+        {language === 'en'
+          ? 'Loading document...'
+          : 'Memuat dokumen...'}
+      </p>
+    </div>
+  )
+}
+function DocumentPreview({ doc, heading, index, language }) {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  const previewUrl = googleDrivePreview(doc.url)
+  const image = isImage(doc.url, doc.fileName || doc.title)
+  const isPdf =
+    /\.pdf(?:[?#].*)?$/i.test(doc.url) || doc.source === 'upload'
+
+  const handleLoad = () => {
+    setLoading(false)
+  }
+
+  const handleError = () => {
+    setLoading(false)
+    setError(true)
+  }
+
+  return (
+    <article className="document-preview">
+      <h3>
+        {(language === 'en'
+          ? (doc.titleEn || doc.title || doc.titleId)
+          : (doc.titleId || doc.title || doc.titleEn)) ||
+          `${heading} ${index + 1}`}
+      </h3>
+
+      {error ? (
+        <div className="document-link-fallback">
+          <p>
+            {language === 'en'
+              ? 'The document preview could not be loaded.'
+              : 'Pratinjau dokumen gagal dimuat.'}
+          </p>
+          <a href={doc.url} target="_blank" rel="noreferrer">
+            {language === 'en'
+              ? 'Open document in a new tab'
+              : 'Buka dokumen di tab baru'}{' '}
+            ↗
+          </a>
+        </div>
+      ) : (
+        <>
+          {loading && <DocumentLoader language={language} />}
+
+          {image ? (
+            <img
+              className="document-preview-image"
+              src={doc.url}
+              alt={doc.title || heading}
+              loading="eager"
+              onLoad={handleLoad}
+              onError={handleError}
+              style={{ display: loading ? 'none' : 'block' }}
+            />
+          ) : previewUrl || isPdf ? (
+            <iframe
+              className="document-preview-frame"
+              src={previewUrl || doc.url}
+              title={doc.title || heading}
+              loading="eager"
+              allow="autoplay"
+              onLoad={handleLoad}
+              onError={handleError}
+              style={{ display: loading ? 'none' : 'block' }}
+            />
+          ) : (
+            <div className="document-link-fallback">
+              <p>
+                {language === 'en'
+                  ? 'This document cannot be previewed inline.'
+                  : 'Pratinjau inline tidak tersedia untuk tautan ini.'}
+              </p>
+              <a href={doc.url} target="_blank" rel="noreferrer">
+                {language === 'en'
+                  ? 'Open document in a new tab'
+                  : 'Buka dokumen di tab baru'}{' '}
+                ↗
+              </a>
+            </div>
+          )}
+        </>
+      )}
+
+      <a
+        className="document-open-link"
+        href={doc.url}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {language === 'en' ? 'Open original' : 'Buka dokumen asli'} ↗
+      </a>
+    </article>
+  )
 }
 
 export default function DocumentModal({ item, kind = 'document', onClose, language = 'id' }) {
@@ -30,14 +148,17 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
   return <div className="document-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose() }}>
     <section className="document-modal" role="dialog" aria-modal="true" aria-label={heading}>
       <header className="document-modal-header"><div><p className="document-modal-eyebrow">{heading}</p><h2>{(language === 'en' ? (item.documentTitleEn || item.documentTitle || item.title || item.role || item.company) : (item.documentTitleId || item.documentTitle || item.titleId || item.roleId || item.companyId || item.title || item.role || item.company)) || heading}</h2></div><button type="button" className="document-modal-close" onClick={onClose} aria-label={language === 'en' ? 'Close' : 'Tutup'}>×</button></header>
-      <div className="document-modal-body">{docs.map((doc, index) => {
-        const previewUrl = googleDrivePreview(doc.url)
-        const image = isImage(doc.url, doc.fileName || doc.title)
-        return <article className="document-preview" key={`${doc.url}-${index}`}><h3>{(language === 'en' ? (doc.titleEn || doc.title || doc.titleId) : (doc.titleId || doc.title || doc.titleEn)) || `${heading} ${index + 1}`}</h3>
-          {image ? <img className="document-preview-image" src={doc.url} alt={doc.title || 'Dokumen'} loading="lazy"/> : previewUrl ? <iframe className="document-preview-frame" src={previewUrl} title={doc.title || heading} loading="lazy" allow="autoplay"/> : /\.pdf(?:[?#].*)?$/i.test(doc.url) || doc.source === 'upload' ? <iframe className="document-preview-frame" src={doc.url} title={doc.title || heading} loading="lazy"/> : <div className="document-link-fallback"><p>{language === 'en' ? 'This document cannot be previewed inline.' : 'Pratinjau inline tidak tersedia untuk tautan ini.'}</p><a href={doc.url} target="_blank" rel="noreferrer">{language === 'en' ? 'Open document in a new tab' : 'Buka dokumen di tab baru'} ↗</a></div>}
-          <a className="document-open-link" href={doc.url} target="_blank" rel="noreferrer">{language === 'en' ? 'Open original' : 'Buka dokumen asli'} ↗</a>
-        </article>
-      })}</div>
+      <div className="document-modal-body">
+        {docs.map((doc, index) => (
+          <DocumentPreview
+            key={`${doc.url}-${index}`}
+            doc={doc}
+            heading={heading}
+            index={index}
+            language={language}
+          />
+))}
+      </div>
       <footer className="document-modal-footer"><button type="button" className="btn btn-line" onClick={onClose}>{language === 'en' ? 'Close' : 'Tutup'}</button></footer>
     </section>
   </div>
