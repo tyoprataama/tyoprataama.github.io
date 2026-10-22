@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle.jsx'
 import { useLanguage } from '../context/LanguageContext.jsx'
+import usaFlag from '/assets/usa.png'
 
 const sections = [
   { id: 'work', label: 'Work', labelId: 'Pekerjaan' },
@@ -14,7 +15,6 @@ export default function Navbar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
-  const [languageMenuOpen, setLanguageMenuOpen] = useState(false)
   const { language, setLanguage } = useLanguage()
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function Navbar() {
     <header className={`mast${scrolled ? ' scrolled' : ''}`}>
       <div className="mast-inner">
         <Link to="/" className="brand">
-          Ty<em>ooo</em>.
+          ty<em>0oo</em>.
         </Link>
         <div className="navwrap">
           {sections.map((s) => (
@@ -48,28 +48,41 @@ export default function Navbar() {
           <Link className="navlink" to="/blog">
             {language === 'id' ? 'Tulisan' : 'Writing'}
           </Link>
-          <div className="language-menu-wrap">
-            <button
-              type="button"
-              className="language-toggle"
-              aria-label={language === 'id' ? 'Pilih bahasa. Saat ini Indonesia' : 'Choose language. Current language English'}
-              aria-haspopup="menu"
-              aria-expanded={languageMenuOpen}
-              onClick={() => setLanguageMenuOpen((open) => !open)}
-            >
-              <span aria-hidden="true">{language === 'id' ? '🇮🇩' : '🇺🇸'}</span>
-            </button>
-            {languageMenuOpen && (
-              <div className="language-dropdown" role="menu" aria-label="Pilih bahasa">
-                <button type="button" role="menuitem" className={language === 'id' ? 'language-option active' : 'language-option'} onClick={() => { setLanguage('id'); setLanguageMenuOpen(false) }}>
-                  <span className="language-option-flag" aria-hidden="true">🇮🇩</span><span className="language-option-copy"><strong>Indonesia</strong><small>Bahasa Indonesia</small></span>{language === 'id' && <span className="language-check">✓</span>}
-                </button>
-                <button type="button" role="menuitem" className={language === 'en' ? 'language-option active' : 'language-option'} onClick={() => { setLanguage('en'); setLanguageMenuOpen(false) }}>
-                  <span className="language-option-flag" aria-hidden="true">🇺🇸</span><span className="language-option-copy"><strong>English</strong><small>English (United States)</small></span>{language === 'en' && <span className="language-check">✓</span>}
-                </button>
-              </div>
-            )}
-          </div>
+
+
+
+<button
+  type="button"
+  className={`language-toggle ${language === 'en' ? 'is-english' : 'is-indonesian'}`}
+  aria-label={
+    language === 'id'
+      ? 'Switch language to English'
+      : 'Ganti bahasa ke Indonesia'
+  }
+  title={language === 'id' ? 'Switch to English' : 'Ganti ke Bahasa Indonesia'}
+  onClick={() => setLanguage(language === 'id' ? 'en' : 'id')}>
+  <span className="language-toggle-track">
+    <span className="language-toggle-thumb">
+      {language === 'id' ? (
+        <span
+        className="language-toggle-flag flag-indonesia"
+        aria-hidden="true"
+        />
+      ) : (
+        <img
+        className="language-toggle-flag"
+        src={usaFlag}
+        alt=""
+        />
+)}
+
+    </span>
+  </span>
+</button>
+
+
+
+
           <ThemeToggle />
         </div>
       </div>

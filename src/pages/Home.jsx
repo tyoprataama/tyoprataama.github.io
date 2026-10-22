@@ -106,7 +106,7 @@ const changeExperiencePage = page => {
     <section className="hero" id="home">
       <div className="wrap hero-grid">
         <div>
-          <div className="lead-eyebrow fade" aria-label={isEn ? 'Portfolio owner identity' : 'Identitas pemilik portofolio'}><span className="dot" /><span className="eyebrow">{localized(hero, 'eyebrow')} | Tyo Pratama Priyanto Putra</span></div>
+          <div className="lead-eyebrow fade" aria-label={isEn ? 'Portfolio owner identity' : 'Identitas pemilik portofolio'}><span className="dot" /><span className="eyebrow">Tyo Pratama Priyanto Putra | {localized(hero, 'eyebrow')}</span></div>
           <h1 className="fade hero-title">{renderHeroTitle(localized(hero, 'titleText') || [hero.titleLine1, hero.titleLine2, hero.emphasis1, hero.titleLine3, hero.emphasis2].filter(Boolean).join(' '))}</h1>
           <p className="sub fade">{localized(hero, 'subtitle')}</p>
           <div className="actions fade">
