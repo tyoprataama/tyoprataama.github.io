@@ -1144,7 +1144,7 @@ body::before {
 
 .document-modal-close {
   position: relative;
-  z-index: 3;
+  z-index: 10;
   flex: 0 0 40px;
   width: 40px;
   height: 40px;
@@ -1368,4 +1368,10 @@ body::before {
   to {
     transform: rotate(360deg);
   }
+}
+.contact-resume-actions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 32px;
 }

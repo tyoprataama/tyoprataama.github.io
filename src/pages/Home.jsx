@@ -122,15 +122,15 @@ const changeExperiencePage = page => {
     </section>
     <div className="wrap"><hr className="rule" /></div>
 
-    <section className="section" id="about"><div className="wrap">
-      <div className="shead sr"><h2>{isEn ? 'About' : 'Tentang'}</h2><span className="no">01 / {isEn ? 'Profile' : 'Profil'}</span></div>
+  <section className="section" id="about"><div className="wrap">
+      <div className="shead sr"><h2>{isEn ? 'About' : 'Tentang'}</h2><span className="no">02 / {isEn ? 'Profile' : 'Profil'}</span></div>
       <div className="about"><div className="body sr"><p>{localized(about, 'profile')}</p><p className="small">{localized(about, 'details')}</p>
         <div className="facts">{facts.map((f, i) => <div className="f" key={f.k || i}><div className="k">{!isEn && f.kId ? f.kId : f.k}</div><div className="v">{!isEn && f.vId ? f.vId : f.v} <small>{!isEn && f.sId ? f.sId : f.s}</small></div></div>)}</div>
       </div></div>
     </div></section>
 
     <section className="section" id="work"><div className="wrap">
-      <div className="shead sr"><h2>{isEn ? 'Selected project' : 'Proyek pilihan'}</h2><span className="no">02 / {isEn ? 'Projects' : 'Proyek'}</span></div>
+      <div className="shead sr"><h2>{isEn ? 'Selected work' : 'Pekerjaan pilihan'}</h2><span className="no">01 / {isEn ? 'Projects' : 'Proyek'}</span></div>
       <div>{visibleProjects.map((p, i) => <div className="work-item sr" key={p.id || p.title || i}>
         <div className="wmain"><h3>{!isEn && p.titleId ? p.titleId : p.title}</h3>{(!isEn && p.categoryId ? p.categoryId : p.category) && <p className="text-xs uppercase tracking-wide text-ink-muted">{!isEn && p.categoryId ? p.categoryId : p.category}</p>}<p>{!isEn && p.descId ? p.descId : p.desc}</p>
           <div className="stack">{(p.tech || []).map((t) => <span key={t}>{t}</span>)}</div>
@@ -139,7 +139,6 @@ const changeExperiencePage = page => {
       </div>)}</div>
       <StaticPagination currentPage={projectPage} totalPages={projectPages} onPageChange={changeProjectPage} />
     </div></section>
-
 
     <section className="section" id="experience"><div className="wrap">
       <div className="shead sr"><h2>{isEn ? 'Experience' : 'Pengalaman'}</h2><span className="no">03 / {isEn ? 'Journey' : 'Perjalanan'}</span></div>
@@ -157,6 +156,10 @@ const changeExperiencePage = page => {
       {contact.profileImage && <div className="avatar sr"><img src={String(contact.profileImage).startsWith('http') ? resolveImageSrc(contact.profileImage) : `${import.meta.env.BASE_URL}${String(contact.profileImage).replace(/^\//, '')}`} alt="Profile" onError={e => { e.currentTarget.style.display = 'none' }} /></div>}
       <span className="eyebrow sr">{localized(contact, 'eyebrow')}</span><h2 className="sr">{localized(contact, 'titleLead')} <em>{localized(contact, 'titleEmphasis')}</em></h2><br />
       <a href={`mailto:${contact.email}`} className="mail sr">{contact.email}</a>
+      {(isEn ? contact.resumeEnUrl : contact.resumeIdUrl) && 
+      <div className="experience-actions contact-resume-actions sr">
+        <button type="button" className="btn  bg-black px-8 py-4 text-white transition-colors duration-300 dark:bg-white dark:text-black" onClick={() => setActiveDocumentItem({ kind: 'resume', item: { title: isEn ? 'Resume' : 'Resume', documentTitleEn: 'Resume', documentTitleId: 'Resume', documents: [{ titleEn: 'Resume preview', titleId: 'Pratinjau resume', url: isEn ? contact.resumeEnUrl : contact.resumeIdUrl }] } })}>{isEn ? 'View Resume' : 'Lihat Resume'} <span className="arw">↗</span></button>
+        </div>}
     </div></section>
     {activeDocumentItem && <DocumentModal item={activeDocumentItem.item} kind={activeDocumentItem.kind} language={language} onClose={() => setActiveDocumentItem(null)} />}
   </>

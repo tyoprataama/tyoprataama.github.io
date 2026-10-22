@@ -6,6 +6,21 @@ function googleDrivePreview(url) {
   if (fileMatch) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`
   return url.replace(/\/edit(?:\?.*)?$/, '/preview')
 }
+function googleDriveDownload(url) {
+  if (!/drive\.google\.com|docs\.google\.com/i.test(url || '')) {
+    return url
+  }
+
+  const fileMatch =
+    url.match(/\/file\/d\/([^/]+)/) ||
+    url.match(/[?&]id=([^&]+)/)
+
+  if (fileMatch) {
+    return `https://drive.google.com/uc?export=download&id=${fileMatch[1]}`
+  }
+
+  return url
+}
 
 function isImage(url, title = '') {
   const imageExtension = /\.(png|jpe?g|webp|gif)(?:[?#].*)?$/i
@@ -136,11 +151,25 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
   const docs = Array.isArray(item.documents) ? item.documents.filter(doc => doc?.url) : []
   if (!docs.length) return null
   const originalDocumentUrl = docs[0].url
-  const heading = kind === 'certificate' ? (language === 'en' ? 'Certificates' : 'Sertifikat') : (language === 'en' ? 'Project documents' : 'Dokumen proyek')
+  const heading =
+    kind === 'certificate' ?
+    (language === 'en' ? 'Certificates' : 'Sertifikat') :
+    kind === 'resume' ?
+    (language === 'en' ? 'Resume' : 'Daftar riwayat hidup'):
+    (language === 'en' ? 'Project documents' : 'Dokumen proyek')
 
   return <div className="document-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose() }}>
     <section className="document-modal" role="dialog" aria-modal="true" aria-label={heading}>
-      <header className="document-modal-header"><div><p className="document-modal-eyebrow">{heading}</p><h2>{(language === 'en' ? (item.documentTitleEn || item.documentTitle || item.title || item.role || item.company) : (item.documentTitleId || item.documentTitle || item.titleId || item.roleId || item.companyId || item.title || item.role || item.company)) || heading}</h2></div>
+      <header className="document-modal-header"><div><p className="document-modal-eyebrow">{heading}</p>
+      <h2>
+  {kind === 'resume'
+    ? 'Tyo Pratama Priyanto Putra'
+    : (language === 'en'
+        ? (item.documentTitleEn || item.documentTitle || item.title || item.role || item.company)
+        : (item.documentTitleId || item.documentTitle || item.titleId || item.roleId || item.companyId || item.title || item.role || item.company)
+      ) || heading}
+</h2>
+      </div>
       <button
   type="button"
   className="document-modal-close"
@@ -175,6 +204,18 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
         ? 'Open original document ↗'
         : 'Buka dokumen asli ↗'}
     </a>
+    <a
+      className="document-open-link"
+      href={googleDriveDownload(originalDocumentUrl)}
+      target="_blank"
+      rel="noopener noreferrer">
+        <button
+          type="button"
+          className="btn btn-line"
+          onClick={handleClose}>
+          {language === 'en' ? 'Download PDF' : 'Unduh PDF'} ↓
+        </button>
+    </a>  
 
     <button
       type="button"
