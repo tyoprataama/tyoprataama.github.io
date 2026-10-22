@@ -54,12 +54,6 @@ function DocumentPreview({ doc, heading, index, language }) {
 
   return (
     <article className="document-preview">
-      <h3>
-        {(language === 'en'
-          ? (doc.titleEn || doc.title || doc.titleId)
-          : (doc.titleId || doc.title || doc.titleEn)) ||
-          `${heading} ${index + 1}`}
-      </h3>
 
       {error ? (
         <div className="document-link-fallback">
@@ -117,23 +111,21 @@ function DocumentPreview({ doc, heading, index, language }) {
           )}
         </>
       )}
-
-      <a
-        className="document-open-link"
-        href={doc.url}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {language === 'en' ? 'Open original' : 'Buka dokumen asli'} ↗
-      </a>
     </article>
   )
 }
 
 export default function DocumentModal({ item, kind = 'document', onClose, language = 'id' }) {
+  const handleClose = (event) => {
+  event?.preventDefault()
+  event?.stopPropagation()
+  onClose()
+}
   useEffect(() => {
     if (!item) return undefined
-    const onKeyDown = event => { if (event.key === 'Escape') onClose() }
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') handleClose()
+    }
     document.addEventListener('keydown', onKeyDown)
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -143,11 +135,21 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
   if (!item) return null
   const docs = Array.isArray(item.documents) ? item.documents.filter(doc => doc?.url) : []
   if (!docs.length) return null
+  const originalDocumentUrl = docs[0].url
   const heading = kind === 'certificate' ? (language === 'en' ? 'Certificates' : 'Sertifikat') : (language === 'en' ? 'Project documents' : 'Dokumen proyek')
 
   return <div className="document-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose() }}>
     <section className="document-modal" role="dialog" aria-modal="true" aria-label={heading}>
-      <header className="document-modal-header"><div><p className="document-modal-eyebrow">{heading}</p><h2>{(language === 'en' ? (item.documentTitleEn || item.documentTitle || item.title || item.role || item.company) : (item.documentTitleId || item.documentTitle || item.titleId || item.roleId || item.companyId || item.title || item.role || item.company)) || heading}</h2></div><button type="button" className="document-modal-close" onClick={onClose} aria-label={language === 'en' ? 'Close' : 'Tutup'}>×</button></header>
+      <header className="document-modal-header"><div><p className="document-modal-eyebrow">{heading}</p><h2>{(language === 'en' ? (item.documentTitleEn || item.documentTitle || item.title || item.role || item.company) : (item.documentTitleId || item.documentTitle || item.titleId || item.roleId || item.companyId || item.title || item.role || item.company)) || heading}</h2></div>
+      <button
+  type="button"
+  className="document-modal-close"
+  onClick={handleClose}
+  aria-label={language === 'en' ? 'Close' : 'Tutup'}
+>
+  <span aria-hidden="true">×</span>
+</button>
+      </header>
       <div className="document-modal-body">
         {docs.map((doc, index) => (
           <DocumentPreview
@@ -159,7 +161,32 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
           />
 ))}
       </div>
-      <footer className="document-modal-footer"><button type="button" className="btn btn-line" onClick={onClose}>{language === 'en' ? 'Close' : 'Tutup'}</button></footer>
+      
+
+<footer className="document-modal-footer">
+  <div className="document-modal-footer-actions">
+    <a
+      className="document-open-link"
+      href={originalDocumentUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {language === 'en'
+        ? 'Open original document ↗'
+        : 'Buka dokumen asli ↗'}
+    </a>
+
+    <button
+      type="button"
+      className="btn btn-line"
+      onClick={handleClose}
+    >
+      {language === 'en' ? 'Close' : 'Tutup'}
+    </button>
+  </div>
+</footer>
+
+
     </section>
   </div>
 }
