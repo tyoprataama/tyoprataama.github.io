@@ -194,7 +194,7 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
 
 <footer className="document-modal-footer">
   <div className="document-modal-footer-actions">
-    <a
+    {/* <a
       className="document-open-link"
       href={originalDocumentUrl}
       target="_blank"
@@ -203,7 +203,7 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
       {language === 'en'
         ? 'Open original document ↗'
         : 'Buka dokumen asli ↗'}
-    </a>
+    </a> */}
     <a
       className="document-open-link"
       href={googleDriveDownload(originalDocumentUrl)}
@@ -213,7 +213,7 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
           type="button"
           className="btn btn-line"
           onClick={handleClose}>
-          {language === 'en' ? 'Download PDF' : 'Unduh PDF'} ↓
+          {language === 'en' ? 'Download' : 'Unduh'} 
         </button>
     </a>  
 

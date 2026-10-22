@@ -123,14 +123,14 @@ const changeExperiencePage = page => {
     <div className="wrap"><hr className="rule" /></div>
 
   <section className="section" id="about"><div className="wrap">
-      <div className="shead sr"><h2>{isEn ? 'About' : 'Tentang'}</h2><span className="no">02 / {isEn ? 'Profile' : 'Profil'}</span></div>
+      <div className="shead sr"><h2>{isEn ? 'About' : 'Tentang'}</h2><span className="no">01 / {isEn ? 'Profile' : 'Profil'}</span></div>
       <div className="about"><div className="body sr"><p>{localized(about, 'profile')}</p><p className="small">{localized(about, 'details')}</p>
         <div className="facts">{facts.map((f, i) => <div className="f" key={f.k || i}><div className="k">{!isEn && f.kId ? f.kId : f.k}</div><div className="v">{!isEn && f.vId ? f.vId : f.v} <small>{!isEn && f.sId ? f.sId : f.s}</small></div></div>)}</div>
       </div></div>
     </div></section>
 
     <section className="section" id="work"><div className="wrap">
-      <div className="shead sr"><h2>{isEn ? 'Selected work' : 'Pekerjaan pilihan'}</h2><span className="no">01 / {isEn ? 'Projects' : 'Proyek'}</span></div>
+      <div className="shead sr"><h2>{isEn ? 'Selected work' : 'Pekerjaan pilihan'}</h2><span className="no">02 / {isEn ? 'Projects' : 'Proyek'}</span></div>
       <div>{visibleProjects.map((p, i) => <div className="work-item sr" key={p.id || p.title || i}>
         <div className="wmain"><h3>{!isEn && p.titleId ? p.titleId : p.title}</h3>{(!isEn && p.categoryId ? p.categoryId : p.category) && <p className="text-xs uppercase tracking-wide text-ink-muted">{!isEn && p.categoryId ? p.categoryId : p.category}</p>}<p>{!isEn && p.descId ? p.descId : p.desc}</p>
           <div className="stack">{(p.tech || []).map((t) => <span key={t}>{t}</span>)}</div>
