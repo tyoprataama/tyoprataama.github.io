@@ -212,7 +212,7 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
         <button
           type="button"
           className="btn btn-line"
-          onClick={handleClose}>
+          >
           {language === 'en' ? 'Download' : 'Unduh'} 
         </button>
     </a>  
