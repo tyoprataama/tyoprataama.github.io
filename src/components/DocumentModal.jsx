@@ -1,11 +1,22 @@
-import { useEffect, useState } from 'react'
+
+import { useCallback, useEffect, useState } from 'react'
 
 function googleDrivePreview(url) {
-  if (!/drive\.google\.com|docs\.google\.com/i.test(url || '')) return null
-  const fileMatch = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/)
-  if (fileMatch) return `https://drive.google.com/file/d/${fileMatch[1]}/preview`
+  if (!/drive\.google\.com|docs\.google\.com/i.test(url || '')) {
+    return null
+  }
+
+  const fileMatch =
+    url.match(/\/file\/d\/([^/]+)/) ||
+    url.match(/[?&]id=([^&]+)/)
+
+  if (fileMatch) {
+    return `https://drive.google.com/file/d/${fileMatch[1]}/preview`
+  }
+
   return url.replace(/\/edit(?:\?.*)?$/, '/preview')
 }
+
 function googleDriveDownload(url) {
   if (!/drive\.google\.com|docs\.google\.com/i.test(url || '')) {
     return url
@@ -31,7 +42,6 @@ function isImage(url, title = '') {
   )
 }
 
-
 function DocumentLoader({ language }) {
   return (
     <div
@@ -39,7 +49,10 @@ function DocumentLoader({ language }) {
       role="status"
       aria-live="polite"
     >
-      <span className="document-loading-spinner" aria-hidden="true" />
+      <span
+        className="document-loading-spinner"
+        aria-hidden="true"
+      />
 
       <p>
         {language === 'en'
@@ -49,14 +62,16 @@ function DocumentLoader({ language }) {
     </div>
   )
 }
-function DocumentPreview({ doc, heading, index, language }) {
+
+function DocumentPreview({ doc, heading, language }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
   const previewUrl = googleDrivePreview(doc.url)
   const image = isImage(doc.url, doc.fileName || doc.title)
   const isPdf =
-    /\.pdf(?:[?#].*)?$/i.test(doc.url) || doc.source === 'upload'
+    /\.pdf(?:[?#].*)?$/i.test(doc.url) ||
+    doc.source === 'upload'
 
   const handleLoad = () => {
     setLoading(false)
@@ -69,7 +84,6 @@ function DocumentPreview({ doc, heading, index, language }) {
 
   return (
     <article className="document-preview">
-
       {error ? (
         <div className="document-link-fallback">
           <p>
@@ -77,7 +91,12 @@ function DocumentPreview({ doc, heading, index, language }) {
               ? 'The document preview could not be loaded.'
               : 'Pratinjau dokumen gagal dimuat.'}
           </p>
-          <a href={doc.url} target="_blank" rel="noreferrer">
+
+          <a
+            href={doc.url}
+            target="_blank"
+            rel="noreferrer"
+          >
             {language === 'en'
               ? 'Open document in a new tab'
               : 'Buka dokumen di tab baru'}{' '}
@@ -116,7 +135,12 @@ function DocumentPreview({ doc, heading, index, language }) {
                   ? 'This document cannot be previewed inline.'
                   : 'Pratinjau inline tidak tersedia untuk tautan ini.'}
               </p>
-              <a href={doc.url} target="_blank" rel="noreferrer">
+
+              <a
+                href={doc.url}
+                target="_blank"
+                rel="noreferrer"
+              >
                 {language === 'en'
                   ? 'Open document in a new tab'
                   : 'Buka dokumen di tab baru'}{' '}
@@ -130,94 +154,159 @@ function DocumentPreview({ doc, heading, index, language }) {
   )
 }
 
-export default function DocumentModal({ item, kind = 'document', onClose, language = 'id' }) {
-  const handleClose = (event) => {
-  event?.preventDefault()
-  event?.stopPropagation()
-  onClose()
-}
+export default function DocumentModal({
+  item,
+  kind = 'document',
+  onClose,
+  language = 'id',
+}) {
+  const handleClose = useCallback(
+    (event) => {
+      event?.preventDefault()
+      event?.stopPropagation()
+      onClose?.()
+    },
+    [onClose]
+  )
+
   useEffect(() => {
     if (!item) return undefined
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') handleClose()
+
+    const previousOverflow = document.body.style.overflow
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        handleClose()
+      }
     }
-    document.addEventListener('keydown', onKeyDown)
-    const previous = document.body.style.overflow
+
+    document.addEventListener('keydown', handleKeyDown)
     document.body.style.overflow = 'hidden'
-    return () => { document.removeEventListener('keydown', onKeyDown); document.body.style.overflow = previous }
-  }, [item, onClose])
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [item, handleClose])
 
   if (!item) return null
-  const docs = Array.isArray(item.documents) ? item.documents.filter(doc => doc?.url) : []
+
+  const docs = Array.isArray(item.documents)
+    ? item.documents.filter((doc) => doc?.url)
+    : []
+
   if (!docs.length) return null
+
   const originalDocumentUrl = docs[0].url
+
   const heading =
-    kind === 'certificate' ?
-    (language === 'en' ? 'Certificates' : 'Sertifikat') :
-    kind === 'resume' ?
-    (language === 'en' ? 'Resume' : 'Daftar riwayat hidup'):
-    (language === 'en' ? 'Project documents' : 'Dokumen proyek')
+    kind === 'certificate'
+      ? language === 'en'
+        ? 'Certificates'
+        : 'Sertifikat'
+      : kind === 'resume'
+        ? language === 'en'
+          ? 'Resume'
+          : 'Daftar riwayat hidup'
+        : language === 'en'
+          ? 'Project documents'
+          : 'Dokumen proyek'
 
-  return <div className="document-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) onClose() }}>
-    <section className="document-modal" role="dialog" aria-modal="true" aria-label={heading}>
-      <header className="document-modal-header"><div><p className="document-modal-eyebrow">{heading}</p>
-      <h2>
-  {kind === 'resume'
-    ? 'Tyo Pratama Priyanto Putra'
-    : (language === 'en'
-        ? (item.documentTitleEn || item.documentTitle || item.title || item.role || item.company)
-        : (item.documentTitleId || item.documentTitle || item.titleId || item.roleId || item.companyId || item.title || item.role || item.company)
-      ) || heading}
-</h2>
-      </div>
-      <button
-  type="button"
-  className="document-modal-close"
-  onClick={handleClose}
-  aria-label={language === 'en' ? 'Close' : 'Tutup'}
->
-  <span aria-hidden="true">×</span>
-</button>
-      </header>
-      <div className="document-modal-body">
-        {docs.map((doc, index) => (
-          <DocumentPreview
-            key={`${doc.url}-${index}`}
-            doc={doc}
-            heading={heading}
-            index={index}
-            language={language}
-          />
-))}
-      </div>
-      
+  const title =
+    kind === 'resume'
+      ? 'Tyo Pratama Priyanto Putra'
+      : (
+          language === 'en'
+            ? (
+                item.documentTitleEn ||
+                item.documentTitle ||
+                item.title ||
+                item.role ||
+                item.company
+              )
+            : (
+                item.documentTitleId ||
+                item.documentTitle ||
+                item.titleId ||
+                item.roleId ||
+                item.companyId ||
+                item.title ||
+                item.role ||
+                item.company
+              )
+        ) || heading
 
-<footer className="document-modal-footer">
-  {kind === 'resume' && (
-    <a
-      className="document-open-link"
-      href={googleDriveDownload(originalDocumentUrl)}
-      target="_blank"
-      rel="noopener noreferrer"
+  return (
+    <div
+      className="document-modal-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) {
+          handleClose(event)
+        }
+      }}
     >
-      <span className="btn btn-line">
-        {language === 'en' ? 'Download' : 'Unduh'}
-      </span>
-    </a>
-  )}
+      <section
+        className="document-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={heading}
+      >
+        <header className="document-modal-header">
+          <div>
+            <p className="document-modal-eyebrow">
+              {heading}
+            </p>
 
-  <div className="document-modal-close">
-    <button
-      type="button"
-      className="btn btn-line"
-      onClick={handleClose}
-    >
-      {language === 'en' ? 'Close' : 'Tutup'}
-    </button>
-  </div>
-</footer>
+            <h2>{title}</h2>
+          </div>
 
+          <button
+            type="button"
+            className="document-modal-close"
+            onClick={handleClose}
+            aria-label={language === 'en' ? 'Close' : 'Tutup'}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
 
-    </section>
-  </div>
+        <div className="document-modal-body">
+          {docs.map((doc, index) => (
+            <DocumentPreview
+              key={`${doc.url}-${index}`}
+              doc={doc}
+              heading={heading}
+              language={language}
+            />
+          ))}
+        </div>
+
+        <footer className="document-modal-footer">
+          {kind === 'resume' && (
+            <a
+              className="document-open-link"
+              href={googleDriveDownload(originalDocumentUrl)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="btn btn-line">
+                {language === 'en' ? 'Download' : 'Unduh'}
+              </span>
+            </a>
+          )}
+
+          <div className="document-modal-footer-close">
+            <button
+              type="button"
+              className="btn btn-line"
+              onClick={handleClose}
+            >
+              {language === 'en' ? 'Close' : 'Tutup'}
+            </button>
+          </div>
+        </footer>
+      </section>
+    </div>
+  )
 }

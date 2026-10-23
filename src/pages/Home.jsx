@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useReveal from '../hooks/useReveal.js'
 import { fetchArticles } from '../api/articles.js'
@@ -44,6 +44,39 @@ export default function Home() {
   const [projectPage, setProjectPage] = useState(1)
   const [experiencePage, setExperiencePage] = useState(1)
   const [activeDocumentItem, setActiveDocumentItem] = useState(null)
+  const handleDocumentClose = useCallback(() => {
+  const kind = activeDocumentItem?.kind
+
+  const targetId =
+    kind === 'certificate'
+      ? 'experience'
+      : kind === 'resume'
+        ? 'contact'
+        : 'work'
+
+  // Tutup modal terlebih dahulu.
+  setActiveDocumentItem(null)
+
+  // Tunggu modal dilepas dari DOM, lalu arahkan ke section tujuan.
+  requestAnimationFrame(() => {
+    const target = document.getElementById(targetId)
+
+    if (!target) return
+
+    // Perbarui hash tanpa memicu navigasi ulang halaman.
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}#${targetId}`
+    )
+
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+  })
+}, [activeDocumentItem])
+
   const savedScrollY = useRef(null)
   const previousPages = useRef({ projectPage, experiencePage })
   const ITEMS_PER_PAGE = 3
@@ -165,6 +198,13 @@ const changeExperiencePage = page => {
         <button type="button" className="btn  bg-black px-8 py-4 text-white transition-colors duration-300 dark:bg-white dark:text-black" onClick={() => setActiveDocumentItem({ kind: 'resume', item: { title: isEn ? 'Resume' : 'Resume', documentTitleEn: 'Resume', documentTitleId: 'Resume', documents: [{ titleEn: 'Resume preview', titleId: 'Pratinjau resume', url: isEn ? contact.resumeEnUrl : contact.resumeIdUrl }] } })}>{isEn ? 'View Resume' : 'Lihat Resume'} <span className="arw">↗</span></button>
         </div>}
     </div></section>
-    {activeDocumentItem && <DocumentModal item={activeDocumentItem.item} kind={activeDocumentItem.kind} language={language} onClose={() => setActiveDocumentItem(null)} />}
+    {activeDocumentItem && (
+    <DocumentModal
+      item={activeDocumentItem.item}
+      kind={activeDocumentItem.kind}
+      language={language}
+      onClose={handleDocumentClose}
+    />
+)}
   </>
 }
