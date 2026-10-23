@@ -4,7 +4,11 @@ import useReveal from '../hooks/useReveal.js'
 import { fetchArticles } from '../api/articles.js'
 import { fetchHomeContent, DEFAULT_HOME_CONTENT, fetchProjects, fetchExperiences } from '../api/homeContent.js'
 import { projects as staticProjects, experiences as staticExperiences } from '../data/portfolio.js'
-import { sortPinnedThenDate, getExcerpt } from '../lib/helpers.js'
+import {
+  sortPinnedThenDate,
+  sortExperiencesPinnedThenDate,
+  getExcerpt,
+} from '../lib/helpers.js'
 import Pagination from '../components/Pagination.jsx'
 import StaticPagination from '../components/StaticPagination.jsx'
 import DocumentModal from '../components/DocumentModal.jsx'
@@ -94,7 +98,7 @@ const changeExperiencePage = page => {
   }, [])
   const latest = sortPinnedThenDate(articles).slice(0, 3)
   const orderedProjects = [...projects].sort((a, b) => Number(!!b.isPinned) - Number(!!a.isPinned) || (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-  const orderedExperiences = [...experiences].sort((a, b) => Number(!!b.isPinned) - Number(!!a.isPinned) || (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+  const orderedExperiences = sortExperiencesPinnedThenDate(experiences)
   const projectPages = Math.ceil(orderedProjects.length / ITEMS_PER_PAGE)
   const experiencePages = Math.ceil(orderedExperiences.length / ITEMS_PER_PAGE)
   const visibleProjects = orderedProjects.slice((projectPage - 1) * ITEMS_PER_PAGE, projectPage * ITEMS_PER_PAGE)

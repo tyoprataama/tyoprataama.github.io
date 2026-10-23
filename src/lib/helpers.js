@@ -134,3 +134,47 @@ export function sortPinnedThenDate(list) {
     ...list.filter((a) => !a.isPinned).sort(byDateDesc),
   ]
 }
+
+const EXPERIENCE_MONTHS = {
+  januari: 1, january: 1,
+  februari: 2, february: 2,
+  maret: 3, march: 3,
+  april: 4,
+  mei: 5, may: 5,
+  juni: 6, june: 6,
+  juli: 7, july: 7,
+  agustus: 8, august: 8,
+  september: 9,
+  oktober: 10, october: 10,
+  november: 11,
+  desember: 12, december: 12,
+}
+
+function getExperiencePeriodDate(period) {
+  const text = String(period || '').toLowerCase()
+  const years = [...text.matchAll(/\b(19\d{2}|20\d{2})\b/g)]
+
+  if (!years.length) return 0
+
+  // Gunakan tahun akhir periode jika tersedia.
+  const year = Number(years[years.length - 1][1])
+  const endText = text.slice(years[years.length - 1].index)
+
+  const monthMatch = Object.entries(EXPERIENCE_MONTHS).find(([name]) =>
+    new RegExp(`\\b${name}\\b`).test(endText)
+  )
+
+  return new Date(year, monthMatch ? monthMatch[1] - 1 : 11, 1).getTime()
+}
+
+export function sortExperiencesPinnedThenDate(list) {
+  return [...list].sort((a, b) => {
+    const pinDifference =
+      Number(Boolean(b.isPinned)) - Number(Boolean(a.isPinned))
+
+    if (pinDifference !== 0) return pinDifference
+
+    return getExperiencePeriodDate(b.period || b.periodId) -
+      getExperiencePeriodDate(a.period || a.periodId)
+  })
+}

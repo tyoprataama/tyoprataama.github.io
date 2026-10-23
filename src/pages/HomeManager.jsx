@@ -3,6 +3,7 @@ import { DEFAULT_HOME_CONTENT, fetchHomeContent, saveHomeContent, fetchProjects,
 import { projects as defaultProjects, experiences as defaultExperiences } from '../data/portfolio.js'
 import ImageInput from '../components/ImageInput.jsx'
 import DocumentManagerInput from '../components/DocumentManagerInput.jsx'
+import { sortExperiencesPinnedThenDate } from '../lib/helpers.js'
 import Pagination from '../components/Pagination.jsx'
 import { deleteStorageUrls, isBucketUrl } from '../lib/storage.js'
 
@@ -69,7 +70,13 @@ export default function HomeManager({ onBack, onLogout }) {
   }
   const submitExperience = async () => {
     setBusy(true); setError(''); setNotice('')
-    try { const sortOrder = experienceEdit.id ? experienceEdit.sortOrder : Math.min(0, ...experienceList.map(e => e.sortOrder ?? 0)) - 1; await saveExperience({ ...experienceEdit, sortOrder }); setExperienceEdit(null); setExperiencePage(1); setExperienceList(await fetchExperiences()); setNotice('Pengalaman berhasil disimpan.') }
+    try { 
+      const sortOrder = experienceEdit.id
+  ? experienceEdit.sortOrder
+  : experienceList.length
+
+await saveExperience({ ...experienceEdit, sortOrder })
+      setExperienceEdit(null); setExperiencePage(1); setExperienceList(await fetchExperiences()); setNotice('Pengalaman berhasil disimpan.') }
     catch (err) { setError(err.message || 'Gagal menyimpan pengalaman.') }
     finally { setBusy(false) }
   }
@@ -128,7 +135,12 @@ export default function HomeManager({ onBack, onLogout }) {
       {tab === 'experience' && <Panel title={`Experience (${experienceList.length})`} actions={<div className="flex flex-wrap gap-2"><button className={buttonClass} disabled={busy} onClick={seedDefaults}>Muat konten bawaan</button><button className={primaryClass} onClick={() => setExperienceEdit({...blankExperience})}>+ Experience</button></div>}>
         {experienceEdit ? <div className="mb-5 rounded-sm2 border border-line p-4"><h3 className="mb-3 font-medium text-ink">{experienceEdit.id?'Edit pengalaman':'Pengalaman baru'}</h3><div className="grid gap-3 sm:grid-cols-2"><Field label={editLanguage === 'en' ? 'Role (English)' : 'Jabatan / peran'} value={editLanguage === 'id' ? experienceEdit.roleId : experienceEdit.role} onChange={v=>setExperienceEdit(p=>({...p,[editLanguage === 'id' ? 'roleId' : 'role']:v}))}/><Field label={editLanguage === 'en' ? 'Company (English)' : 'Perusahaan / organisasi'} value={editLanguage === 'id' ? experienceEdit.companyId : experienceEdit.company} onChange={v=>setExperienceEdit(p=>({...p,[editLanguage === 'id' ? 'companyId' : 'company']:v}))}/><Field label={editLanguage === 'en' ? 'Period (English)' : 'Periode'} value={editLanguage === 'id' ? experienceEdit.periodId : experienceEdit.period} onChange={v=>setExperienceEdit(p=>({...p,[editLanguage === 'id' ? 'periodId' : 'period']:v}))}/><label className="flex items-center gap-2 text-sm text-ink"><input type="checkbox" checked={experienceEdit.isPinned} onChange={e=>setExperienceEdit(p=>({...p,isPinned:e.target.checked}))}/> Pinned / utamakan pengalaman</label><label className="flex items-center gap-2 text-sm text-ink"><input type="checkbox" checked={experienceEdit.isVisible} onChange={e=>setExperienceEdit(p=>({...p,isVisible:e.target.checked}))}/> Tampilkan di Home</label><div className="sm:col-span-2"><Field label={editLanguage === 'en' ? 'Description (English)' : 'Deskripsi (Indonesia)'} multiline value={editLanguage === 'id' ? experienceEdit.descriptionId : experienceEdit.description} onChange={v=>setExperienceEdit(p=>({...p,[editLanguage === 'id' ? 'descriptionId' : 'description']:v}))}/></div><DocumentManagerInput label={editLanguage === 'en' ? 'Experience documents / certificates (optional)' : 'Sertifikat / dokumen pengalaman (opsional)'} language={editLanguage} value={experienceEdit.documents || []} onChange={documents=>setExperienceEdit(p=>({...p,documents}))}/><div className="sm:col-span-2"><Field label={editLanguage === 'en' ? 'Certificate popup title (optional)' : 'Judul popup sertifikat (opsional)'} value={editLanguage === 'en' ? (experienceEdit.documentTitleEn || '') : (experienceEdit.documentTitleId || experienceEdit.documentTitle || '')} onChange={v=>setExperienceEdit(p=>({...p,[editLanguage === 'en' ? 'documentTitleEn' : 'documentTitleId']:v, ...(editLanguage === 'id' ? {documentTitle:v} : {})}))} placeholder={editLanguage === 'en' ? 'Example: General OHS Certificate' : 'Contoh: Sertifikat AK3 Umum'}/></div></div><div className="mt-4 flex gap-2"><button className={primaryClass} disabled={busy} onClick={submitExperience}>{busy?'Menyimpan…':'Simpan pengalaman'}</button><button className={buttonClass} onClick={()=>setExperienceEdit(null)}>Batal</button></div></div> : null}
         {experienceList.length===0 && !experienceEdit ? <p className="mb-4 text-sm text-ink-secondary">Belum ada pengalaman di database. Tekan “Muat konten bawaan” untuk menyalin pengalaman yang saat ini tertulis di file portfolio.js.</p> : null}
-        <div className="flex flex-col gap-2">{experienceList.slice((experiencePage-1)*ITEMS_PER_PAGE, experiencePage*ITEMS_PER_PAGE).map(e=><div key={e.id} className="flex flex-wrap items-center justify-between gap-3 rounded-sm2 border border-line p-3"><div className="min-w-0"><p className="font-medium text-ink">{e.role}</p><p className="text-xs text-ink-secondary">{e.company} · {e.period} · {e.isPinned ? 'Pinned · ' : ''}{e.isVisible?'Tampil':'Disembunyikan'}</p></div><div className="flex gap-2"><button className={buttonClass} onClick={()=>setExperienceEdit(e)}>Edit</button><button className={`${buttonClass} !text-red-600`} onClick={()=>removeExperience(e)}>Hapus</button></div></div>)}</div>
+        <div className="flex flex-col gap-2">{
+        sortExperiencesPinnedThenDate(experienceList).slice(
+          (experiencePage - 1) * ITEMS_PER_PAGE,
+          experiencePage * ITEMS_PER_PAGE
+        )
+        .map(e=><div key={e.id} className="flex flex-wrap items-center justify-between gap-3 rounded-sm2 border border-line p-3"><div className="min-w-0"><p className="font-medium text-ink">{e.role}</p><p className="text-xs text-ink-secondary">{e.company} · {e.period} · {e.isPinned ? 'Pinned · ' : ''}{e.isVisible?'Tampil':'Disembunyikan'}</p></div><div className="flex gap-2"><button className={buttonClass} onClick={()=>setExperienceEdit(e)}>Edit</button><button className={`${buttonClass} !text-red-600`} onClick={()=>removeExperience(e)}>Hapus</button></div></div>)}</div>
         <Pagination currentPage={experiencePage} totalPages={Math.ceil(experienceList.length / ITEMS_PER_PAGE)} totalItems={experienceList.length} itemsPerPage={ITEMS_PER_PAGE} onPageChange={setExperiencePage} />
       </Panel>}
     </>}
