@@ -1375,3 +1375,14 @@ body::before {
   width: 100%;
   margin-top: 32px;
 }
+.document-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.document-modal-close {
+  margin-left: auto;
+  padding-right: 24px;
+}

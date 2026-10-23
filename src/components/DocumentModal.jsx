@@ -193,30 +193,20 @@ export default function DocumentModal({ item, kind = 'document', onClose, langua
       
 
 <footer className="document-modal-footer">
-  <div className="document-modal-footer-actions">
-    {/* <a
-      className="document-open-link"
-      href={originalDocumentUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {language === 'en'
-        ? 'Open original document ↗'
-        : 'Buka dokumen asli ↗'}
-    </a> */}
+  {kind === 'resume' && (
     <a
       className="document-open-link"
       href={googleDriveDownload(originalDocumentUrl)}
       target="_blank"
-      rel="noopener noreferrer">
-        <button
-          type="button"
-          className="btn btn-line"
-          >
-          {language === 'en' ? 'Download' : 'Unduh'} 
-        </button>
-    </a>  
+      rel="noopener noreferrer"
+    >
+      <span className="btn btn-line">
+        {language === 'en' ? 'Download' : 'Unduh'}
+      </span>
+    </a>
+  )}
 
+  <div className="document-modal-close">
     <button
       type="button"
       className="btn btn-line"
