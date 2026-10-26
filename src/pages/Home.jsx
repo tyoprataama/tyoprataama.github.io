@@ -44,38 +44,13 @@ export default function Home() {
   const [projectPage, setProjectPage] = useState(1)
   const [experiencePage, setExperiencePage] = useState(1)
   const [activeDocumentItem, setActiveDocumentItem] = useState(null)
-  const handleDocumentClose = useCallback(() => {
-  const kind = activeDocumentItem?.kind
+  const activeDocumentRef = useRef(null)
+activeDocumentRef.current = activeDocumentItem
 
-  const targetId =
-    kind === 'certificate'
-      ? 'experience'
-      : kind === 'resume'
-        ? 'contact'
-        : 'work'
-
-  // Tutup modal terlebih dahulu.
+const handleDocumentClose = useCallback(() => {
   setActiveDocumentItem(null)
+}, [])
 
-  // Tunggu modal dilepas dari DOM, lalu arahkan ke section tujuan.
-  requestAnimationFrame(() => {
-    const target = document.getElementById(targetId)
-
-    if (!target) return
-
-    // Perbarui hash tanpa memicu navigasi ulang halaman.
-    window.history.replaceState(
-      null,
-      '',
-      `${window.location.pathname}${window.location.search}#${targetId}`
-    )
-
-    target.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start',
-    })
-  })
-}, [activeDocumentItem])
 
   const savedScrollY = useRef(null)
   const previousPages = useRef({ projectPage, experiencePage })
@@ -199,12 +174,13 @@ const changeExperiencePage = page => {
         </div>}
     </div></section>
     {activeDocumentItem && (
-    <DocumentModal
-      item={activeDocumentItem.item}
-      kind={activeDocumentItem.kind}
-      language={language}
-      onClose={handleDocumentClose}
-    />
+  <DocumentModal
+    key={`${activeDocumentItem.kind}-${activeDocumentItem.item?.id ?? activeDocumentItem.item?.title ?? ''}`}
+    item={activeDocumentItem.item}
+    kind={activeDocumentItem.kind}
+    language={language}
+    onClose={handleDocumentClose}
+  />
 )}
   </>
 }

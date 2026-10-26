@@ -1,5 +1,6 @@
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 function googleDrivePreview(url) {
   if (!/drive\.google\.com|docs\.google\.com/i.test(url || '')) {
@@ -154,41 +155,35 @@ function DocumentPreview({ doc, heading, language }) {
   )
 }
 
-export default function DocumentModal({
-  item,
-  kind = 'document',
-  onClose,
-  language = 'id',
-}) {
-  const handleClose = useCallback(
-    (event) => {
-      event?.preventDefault()
-      event?.stopPropagation()
-      onClose?.()
-    },
-    [onClose]
-  )
+export default function DocumentModal({ item, kind = 'document', onClose, language = 'id' }) {
+  const onCloseRef = useRef(onClose)
+  const dialogRef = useRef(null)
+  const pressedOnBackdrop = useRef(false)
+
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
+
+  const handleClose = useCallback((event) => {
+    event?.preventDefault?.()
+    event?.stopPropagation?.()
+    onCloseRef.current?.()
+  }, [])
+
+  const isOpen = Boolean(item)
 
   useEffect(() => {
-    if (!item) return undefined
-
+    if (!isOpen) return undefined
     const previousOverflow = document.body.style.overflow
-
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        handleClose()
-      }
+      if (event.key === 'Escape') { event.preventDefault(); handleClose() }
     }
-
-    document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown)
     document.body.style.overflow = 'hidden'
-
+    dialogRef.current?.focus({ preventScroll: true })
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', handleKeyDown)
       document.body.style.overflow = previousOverflow
     }
-  }, [item, handleClose])
+  }, [isOpen, handleClose])
 
   if (!item) return null
 
@@ -237,16 +232,19 @@ export default function DocumentModal({
               )
         ) || heading
 
-  return (
+  return createPortal (
     <div
       className="document-modal-backdrop"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          handleClose(event)
-        }
+      onMouseDown={(e) => { pressedOnBackdrop.current = e.target === e.currentTarget }}
+      onClick={(e) => {
+        if (pressedOnBackdrop.current && e.target === e.currentTarget) handleClose(e)
+        pressedOnBackdrop.current = false
       }}
     >
       <section
+        ref={dialogRef}
+        tabIndex={-1}
+        style={{ outline: 'none' }}
         className="document-modal"
         role="dialog"
         aria-modal="true"
@@ -307,6 +305,6 @@ export default function DocumentModal({
           </div>
         </footer>
       </section>
-    </div>
+    </div>, document.body
   )
 }
